@@ -22,13 +22,16 @@ Keep it concise (5–7 lines).
 Avoid diagnosis.
 Be actionable and empathetic.
 """
-
+    print("Gemini is generating recommendation...")
     try:
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=prompt
         )
+        print("Gemini recommendation generated.")
         return response.text.strip()
     except Exception as e:
-        print("Gemini Error:", e)
+        print("\n\nGemini Error:", e)
         return "Unable to generate recommendation at the moment."
+    
+    
