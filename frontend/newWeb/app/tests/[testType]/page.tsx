@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/lib/supabase-auth-context'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { testResponseSchema, TestResponseInput } from '@/lib/schemas'
@@ -24,7 +24,7 @@ import Link from 'next/link'
 export default function TestPage() {
   const params = useParams()
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, isLoading } = useAuth()
   const testType = params.testType as TestType
   const [step, setStep] = useState<'start' | 'questions' | 'results'>('start')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -41,12 +41,12 @@ export default function TestPage() {
   })
 
   React.useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login?from=' + router.pathname)
+    if (!isLoading && !user) {
+      router.push('/auth/login')
     }
-  }, [user, loading, router])
+  }, [user, isLoading, router])
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-2xl mx-auto px-4 py-8">
@@ -85,14 +85,65 @@ export default function TestPage() {
   const onSubmit = async (data: TestResponseInput) => {
     setIsSubmitting(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      // Check if ML predictions are enabled
+      const useMLPredictions = process.env.NEXT_PUBLIC_USE_ML_PREDICTIONS === 'true'
 
-      const result = calculateTestScore(testType, data)
+      let result
+      let response
+
+      if (useMLPredictions) {
+        // Use ML prediction service
+        console.log('[v0] Using ML prediction service')
+        response = await fetch('/api/tests/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            testType,
+            answers: data,
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to get ML prediction')
+        }
+
+        const predictionResult = await response.json()
+        result = {
+          score: predictionResult.result.score,
+          severityLevel: predictionResult.result.severityLevel,
+          interpretation: predictionResult.result.interpretation,
+          recommendations: predictionResult.result.recommendations,
+          confidencePercentage: predictionResult.result.confidencePercentage,
+        }
+      } else {
+        // Fall back to local scoring (original behavior)
+        console.log('[v0] Using local test scoring')
+        result = calculateTestScore(testType, data)
+        
+        response = await fetch('/api/tests/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            testType,
+            score: result.score,
+            severityLevel: result.severityLevel,
+            interpretation: result.interpretation,
+            recommendations: result.recommendations,
+            answers: data,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to save test results')
+        }
+      }
+
       setTestResult(result)
       setStep('results')
     } catch (error) {
-      console.error('Error submitting test:', error)
+      console.error('[v0] Error submitting test:', error)
+      alert(error instanceof Error ? error.message : 'Failed to save test results. Please try again.')
     } finally {
       setIsSubmitting(false)
     }

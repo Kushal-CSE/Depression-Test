@@ -15,6 +15,7 @@ export interface TestResult {
   category: 'minimal' | 'mild' | 'moderate' | 'moderately-severe' | 'severe'
   recommendations: string[]
   severity: 'low' | 'moderate' | 'elevated' | 'high'
+  confidencePercentage?: number
 }
 
 export interface TestSubmission {

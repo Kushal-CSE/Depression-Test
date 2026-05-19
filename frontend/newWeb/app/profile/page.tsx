@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/lib/supabase-auth-context'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,7 +15,7 @@ import { ArrowLeft, User, Mail, Calendar, LogOut } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProfilePage() {
-  const { user, loading, logout } = useAuth()
+  const { user, isLoading, logout } = useAuth()
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
 
@@ -33,19 +33,30 @@ export default function ProfilePage() {
   })
 
   React.useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login?from=/profile')
+    if (!isLoading && !user) {
+      router.push('/auth/login')
     }
-  }, [user, loading, router])
+  }, [user, isLoading, router])
 
   const onSubmit = async (data: UpdateProfileInput) => {
     setIsSaving(true)
     try {
-      // Simulate API call to update profile
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch('/api/profile/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update profile')
+      }
+
+      alert('Profile updated successfully')
       reset()
-    } catch (error) {
-      console.error('Error updating profile:', error)
+    } catch (error: any) {
+      console.error('[v0] Error updating profile:', error)
+      alert(error.message || 'Failed to update profile')
     } finally {
       setIsSaving(false)
     }
@@ -56,7 +67,7 @@ export default function ProfilePage() {
     router.push('/')
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-2xl mx-auto px-4 py-8">

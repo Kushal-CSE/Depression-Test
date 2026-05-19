@@ -39,9 +39,17 @@ export function ResultCard({ testName, result }: ResultCardProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Score</h3>
-            <p className="text-3xl font-bold text-primary">{result.score}</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-2">Score</h3>
+              <p className="text-3xl font-bold text-primary">{result.score}</p>
+            </div>
+            {result.confidencePercentage !== undefined && (
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Model Confidence</h3>
+                <p className="text-3xl font-bold text-secondary">{result.confidencePercentage}%</p>
+              </div>
+            )}
           </div>
 
           <Alert className={`border-2 ${severityColors[result.severity]}`}>

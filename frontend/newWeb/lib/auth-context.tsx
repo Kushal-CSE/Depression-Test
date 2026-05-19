@@ -14,63 +14,107 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Initialize auth state from token
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const token = localStorage.getItem('authToken')
-        if (token) {
-          // Validate token with backend
-          const response = await axios.get(`${API_BASE_URL}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          setUser(response.data.user)
-          setIsAuthenticated(true)
-        }
-      } catch (error) {
-        localStorage.removeItem('authToken')
-        setUser(null)
-        setIsAuthenticated(false)
-      } finally {
-        setLoading(false)
-      }
-    }
+  // useEffect(() => {
+  //   const initializeAuth = async () => {
+  //     try {
+  //       const token = localStorage.getItem('authToken')
+  //       if (token) {
+  //         // Validate token with backend
+  //         const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         })
+  //         setUser(response.data.user)
+  //         setIsAuthenticated(true)
+  //       }
+  //     } catch (error) {
+  //       localStorage.removeItem('authToken')
+  //       setUser(null)
+  //       setIsAuthenticated(false)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
 
-    initializeAuth()
-  }, [])
+  //   initializeAuth()
+  // }, [])
+useEffect(() => {
+  const token = localStorage.getItem('authToken')
 
-  const login = useCallback(async (email: string, password: string) => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, {
-        email,
-        password,
-      })
-      const { token, user: userData } = response.data
-      localStorage.setItem('authToken', token)
-      setUser(userData)
-      setIsAuthenticated(true)
-    } catch (error) {
-      throw error
-    }
-  }, [])
+  if (token) {
+    setUser({
+      id: '1',
+      username: 'Rishi',
+      email: 'test@example.com',
+    } as UserProfile)
 
+    setIsAuthenticated(true)
+  }
+
+  setLoading(false)
+}, [])
+
+  // const login = useCallback(async (email: string, password: string) => {
+  //   try {
+  //     const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+  //       email,
+  //       password,
+  //     })
+  //     const { token, user: userData } = response.data
+  //     localStorage.setItem('authToken', token)
+  //     setUser(userData)
+  //     setIsAuthenticated(true)
+  //   } catch (error) {
+  //     throw error
+  //   }
+  // }, [])
+const login = useCallback(async (email: string, password: string) => {
+  const dummyToken = 'dummy-jwt-token'
+
+  localStorage.setItem('authToken', dummyToken)
+
+  setUser({
+    id: '1',
+    username: 'Rishi',
+    email,
+  } as UserProfile)
+
+  setIsAuthenticated(true)
+}, [])
+
+  // const signup = useCallback(
+  //   async (email: string, username: string, password: string) => {
+  //     try {
+  //       const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
+  //         email,
+  //         username,
+  //         password,
+  //       })
+  //       const { token, user: userData } = response.data
+  //       localStorage.setItem('authToken', token)
+  //       setUser(userData)
+  //       setIsAuthenticated(true)
+  //     } catch (error) {
+  //       throw error
+  //     }
+  //   },
+  //   []
+  // )
   const signup = useCallback(
-    async (email: string, username: string, password: string) => {
-      try {
-        const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
-          email,
-          username,
-          password,
-        })
-        const { token, user: userData } = response.data
-        localStorage.setItem('authToken', token)
-        setUser(userData)
-        setIsAuthenticated(true)
-      } catch (error) {
-        throw error
-      }
-    },
-    []
-  )
+  async (email: string, username: string, password: string) => {
+    const dummyToken = 'dummy-jwt-token'
+
+    localStorage.setItem('authToken', dummyToken)
+
+    setUser({
+      id: '1',
+      username,
+      email,
+    } as UserProfile)
+
+    setIsAuthenticated(true)
+  },
+  []
+)
 
   const logout = useCallback(async () => {
     try {

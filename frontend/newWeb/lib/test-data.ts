@@ -101,7 +101,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
         { value: 0, label: 'I do not feel sad' },
         { value: 1, label: 'I feel sad much of the time' },
         { value: 2, label: 'I am sad all the time' },
-        { value: 3, label: "I am so sad or unhappy that I can't stand it" },
+        { value: 3, label: 'I am so sad or unhappy that I can't stand it' },
       ],
     },
     {
@@ -129,16 +129,16 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       text: 'Loss of Pleasure',
       options: [
         { value: 0, label: 'I get as much pleasure as I ever did from the things I enjoy' },
-        { value: 1, label: 'I don\'t enjoy things as much as I used to' },
+        { value: 1, label: 'I don't enjoy things as much as I used to' },
         { value: 2, label: 'I get very little pleasure from the things that I used to enjoy' },
-        { value: 3, label: 'I can\'t get any pleasure from the things I used to enjoy' },
+        { value: 3, label: 'I can't get any pleasure from the things I used to enjoy' },
       ],
     },
     {
       id: 'bdi2_5',
       text: 'Guilty Feelings',
       options: [
-        { value: 0, label: 'I don\'t feel particularly guilty' },
+        { value: 0, label: 'I don't feel particularly guilty' },
         { value: 1, label: 'I feel guilty over many things I have done or should have done' },
         { value: 2, label: 'I feel quite guilty most of the time' },
         { value: 3, label: 'I feel guilty all of the time' },
@@ -148,7 +148,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       id: 'bdi2_6',
       text: 'Punishment Feelings',
       options: [
-        { value: 0, label: 'I don\'t feel I am being punished' },
+        { value: 0, label: 'I don't feel I am being punished' },
         { value: 1, label: 'I feel I may be punished' },
         { value: 2, label: 'I expect to be punished' },
         { value: 3, label: 'I feel I am being punished' },
@@ -168,7 +168,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       id: 'bdi2_8',
       text: 'Self-Accusation',
       options: [
-        { value: 0, label: 'I don\'t criticize or blame myself more than usual' },
+        { value: 0, label: 'I don't criticize or blame myself more than usual' },
         { value: 1, label: 'I am more critical of myself than I used to be' },
         { value: 2, label: 'I criticize myself for all of my faults' },
         { value: 3, label: 'I blame myself for everything bad that happens' },
@@ -178,7 +178,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       id: 'bdi2_9',
       text: 'Suicidal Thoughts or Wishes',
       options: [
-        { value: 0, label: 'I don\'t have any thoughts of killing myself' },
+        { value: 0, label: 'I don't have any thoughts of killing myself' },
         { value: 1, label: 'I have thoughts of killing myself but would not carry them out' },
         { value: 2, label: 'I would like to kill myself' },
         { value: 3, label: 'I would kill myself if I had the chance' },
@@ -188,10 +188,10 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       id: 'bdi2_10',
       text: 'Crying',
       options: [
-        { value: 0, label: 'I don\'t cry anymore than I used to' },
+        { value: 0, label: 'I don't cry anymore than I used to' },
         { value: 1, label: 'I cry more now than I used to' },
         { value: 2, label: 'I cry over every little thing' },
-        { value: 3, label: 'I feel like crying but can\'t' },
+        { value: 3, label: 'I feel like crying but can't' },
       ],
     },
     {
@@ -211,7 +211,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
         { value: 0, label: 'I have not lost interest in other people or activities' },
         { value: 1, label: 'I am less interested in other people or things than before' },
         { value: 2, label: 'I have lost most of my interest in other people or things' },
-        { value: 3, label: 'It\'s hard to get interested in anything' },
+        { value: 3, label: 'It's hard to get interested in anything' },
       ],
     },
     {
@@ -221,7 +221,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
         { value: 0, label: 'I make decisions about as well as I ever could' },
         { value: 1, label: 'I find it more difficult to make decisions than usual' },
         { value: 2, label: 'I have much greater difficulty in making decisions than I used to' },
-        { value: 3, label: 'I can\'t make any decisions at all anymore' },
+        { value: 3, label: 'I can't make any decisions at all anymore' },
       ],
     },
     {
@@ -229,7 +229,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       text: 'Worthlessness',
       options: [
         { value: 0, label: 'I do not feel worthless' },
-        { value: 1, label: 'I don\'t consider myself as worthwhile and useful as I used to' },
+        { value: 1, label: 'I don't consider myself as worthwhile and useful as I used to' },
         { value: 2, label: 'I feel more worthless as compared to other people' },
         { value: 3, label: 'I feel utterly worthless' },
       ],
@@ -240,15 +240,15 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       options: [
         { value: 0, label: 'I have as much energy as ever' },
         { value: 1, label: 'I have less energy than I used to have' },
-        { value: 2, label: 'I don\'t have enough energy to do very much' },
-        { value: 3, label: 'I don\'t have enough energy to do anything' },
+        { value: 2, label: 'I don't have enough energy to do very much' },
+        { value: 3, label: 'I don't have enough energy to do anything' },
       ],
     },
     {
       id: 'bdi2_16',
       text: 'Changes in Sleep Pattern',
       options: [
-        { value: 0, label: 'I haven\'t experienced any change in my sleeping pattern' },
+        { value: 0, label: 'I haven't experienced any change in my sleeping pattern' },
         { value: 1, label: 'I sleep somewhat more than usual' },
         { value: 2, label: 'I sleep a lot more than usual' },
         { value: 3, label: 'I sleep most of the day' },
@@ -268,7 +268,7 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       id: 'bdi2_18',
       text: 'Changes in Appetite',
       options: [
-        { value: 0, label: 'I haven\'t experienced any change in my appetite' },
+        { value: 0, label: 'I haven't experienced any change in my appetite' },
         { value: 1, label: 'My appetite is somewhat less than usual' },
         { value: 2, label: 'My appetite is much less than before' },
         { value: 3, label: 'I have no appetite at all anymore' },
@@ -279,9 +279,9 @@ export const testQuestions: Record<TestType, TestQuestion[]> = {
       text: 'Concentration Difficulty',
       options: [
         { value: 0, label: 'I can concentrate as well as ever' },
-        { value: 1, label: 'I can\'t concentrate as well as usual' },
-        { value: 2, label: 'It\'s hard to keep my mind on anything for very long' },
-        { value: 3, label: 'I find I can\'t concentrate on anything' },
+        { value: 1, label: 'I can't concentrate as well as usual' },
+        { value: 2, label: 'It's hard to keep my mind on anything for very long' },
+        { value: 3, label: 'I find I can't concentrate on anything' },
       ],
     },
     {
