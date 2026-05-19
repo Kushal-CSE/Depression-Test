@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useAuth } from '@/lib/supabase-auth-context'
+import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,14 +9,14 @@ import { Leaf, Heart, Brain, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
   const router = useRouter()
 
-  React.useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.push('/dashboard')
-    }
-  }, [isAuthenticated, isLoading, router])
+  // React.useEffect(() => {
+  //   if (!loading && isAuthenticated) {
+  //     router.push('/dashboard')
+  //   }
+  // }, [isAuthenticated, loading, router])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted">
