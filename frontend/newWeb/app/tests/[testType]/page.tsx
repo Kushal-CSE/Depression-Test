@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/lib/flask-auth-context'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { testResponseSchema, TestResponseInput } from '@/lib/schemas'
@@ -24,7 +24,7 @@ import Link from 'next/link'
 export default function TestPage() {
   const params = useParams()
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, isLoading } = useAuth()
   const testType = params.testType as TestType
   const [step, setStep] = useState<'start' | 'questions' | 'results'>('start')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -41,12 +41,12 @@ export default function TestPage() {
   })
 
   React.useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login?from=' + router.pathname)
+    if (!isLoading && !user) {
+      router.push('/auth/login')
     }
-  }, [user, loading, router])
+  }, [user, isLoading, router])
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-2xl mx-auto px-4 py-8">
@@ -85,14 +85,62 @@ export default function TestPage() {
   const onSubmit = async (data: TestResponseInput) => {
     setIsSubmitting(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      console.log('[v0] Sending answers to Flask ML backend:', { testType, answers: data })
+      
+      // Call Flask backend directly for ML prediction
+      const flaskUrl = process.env.NEXT_PUBLIC_FLASK_URL || 'http://localhost:5000'
+      const response = await fetch(`${flaskUrl}/api/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      })
 
-      const result = calculateTestScore(testType, data)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to get prediction from ML model')
+      }
+
+      const prediction = await response.json()
+      console.log('[v0] ML prediction received:', prediction)
+
+      // Map ML prediction (0-3) to severity level and generate recommendations
+      const severityMap = ['minimal', 'mild', 'moderate', 'severe']
+      const severityLevel = severityMap[prediction.prediction] || 'minimal'
+
+      // Get recommendations from Flask or fallback to local
+      const recommendations = prediction.recommendations || [prediction.mental_health_tip || 'Continue monitoring your mental health']
+
+      const result = {
+        score: prediction.prediction,
+        severityLevel,
+        interpretation: prediction.mental_health_tip || 'Assessment complete',
+        recommendations: Array.isArray(recommendations) ? recommendations : [recommendations],
+        confidencePercentage: Math.round((prediction.confidence_score || 0) * 100),
+      }
+
+      // Save to Flask backend
+      const saveResponse = await fetch(`${flaskUrl}/api/predictions/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          testType,
+          prediction: prediction.prediction,
+          confidence: prediction.confidence_score,
+          answers: data,
+        }),
+      })
+
+      if (!saveResponse.ok) {
+        console.warn('[v0] Failed to save prediction to backend, but displaying results')
+      }
+
       setTestResult(result)
       setStep('results')
     } catch (error) {
-      console.error('Error submitting test:', error)
+      console.error('[v0] Error submitting test:', error)
+      alert(error instanceof Error ? error.message : 'Failed to get prediction. Make sure Flask backend is running on port 5000.')
     } finally {
       setIsSubmitting(false)
     }

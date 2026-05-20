@@ -1,4 +1,4 @@
-from backend.services import auth_service
+from services import auth_service
 from dotenv import load_dotenv
 from services.ollama_service import generate_recommendation
 import db.repository as repository
@@ -82,7 +82,7 @@ def predict():
 def signup():
 
     data = request.json
-
+    print(f"Signup request data: {data}")
     result = auth_service.signup_user(data)
 
     return jsonify(result["body"]), result["status"]
