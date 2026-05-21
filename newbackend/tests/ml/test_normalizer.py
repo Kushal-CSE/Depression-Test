@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from ml.preprocessing.normalizer import (
@@ -12,38 +13,61 @@ from fixtures.prediction_payloads import (
 )
 
 
-def test_normalize_features_returns_dictionary():
+# ---------------------------------
+# Helpers
+# ---------------------------------
 
-    normalized_data = normalize_features(
+def build_dataframe(payload):
+
+    return pd.DataFrame([payload])
+
+
+# ---------------------------------
+# normalize_features
+# ---------------------------------
+
+def test_normalize_features_returns_dataframe():
+
+    dataframe = build_dataframe(
         VALID_PREDICTION_PAYLOAD
+    )
+
+    normalized, scaler = normalize_features(
+        dataframe
     )
 
     assert isinstance(
-        normalized_data,
-        dict
+        normalized,
+        pd.DataFrame
     )
 
 
-def test_normalize_features_preserves_keys():
+def test_normalize_features_preserves_columns():
 
-    normalized_data = normalize_features(
+    dataframe = build_dataframe(
         VALID_PREDICTION_PAYLOAD
     )
 
-    assert set(
-        normalized_data.keys()
-    ) == set(
-        VALID_PREDICTION_PAYLOAD.keys()
+    normalized, scaler = normalize_features(
+        dataframe
+    )
+
+    assert set(normalized.columns) == set(
+        dataframe.columns
     )
 
 
 def test_normalize_features_returns_numeric_values():
 
-    normalized_data = normalize_features(
+    dataframe = build_dataframe(
         VALID_PREDICTION_PAYLOAD
     )
 
-    for value in normalized_data.values():
+    normalized, scaler = normalize_features(
+        dataframe
+    )
+
+    for value in normalized.iloc[0]:
 
         assert isinstance(
             value,
@@ -51,82 +75,125 @@ def test_normalize_features_returns_numeric_values():
         )
 
 
-def test_scale_features_returns_dictionary():
+def test_normalize_features_low_risk_payload():
 
-    scaled_data = scale_features(
-        VALID_PREDICTION_PAYLOAD
-    )
-
-    assert isinstance(
-        scaled_data,
-        dict
-    )
-
-
-def test_scale_features_preserves_keys():
-
-    scaled_data = scale_features(
-        VALID_PREDICTION_PAYLOAD
-    )
-
-    assert set(
-        scaled_data.keys()
-    ) == set(
-        VALID_PREDICTION_PAYLOAD.keys()
-    )
-
-
-def test_scale_features_returns_numeric_values():
-
-    scaled_data = scale_features(
-        VALID_PREDICTION_PAYLOAD
-    )
-
-    for value in scaled_data.values():
-
-        assert isinstance(
-            value,
-            (int, float)
-        )
-
-
-def test_normalize_features_handles_low_risk_payload():
-
-    normalized_data = normalize_features(
+    dataframe = build_dataframe(
         LOW_RISK_PREDICTION_PAYLOAD
     )
 
+    normalized, scaler = normalize_features(
+        dataframe
+    )
+
     assert (
-        normalized_data["Melancholic"]
+        normalized.iloc[0]["Melancholic"]
         >= 0
     )
 
 
-def test_normalize_features_handles_high_risk_payload():
+def test_normalize_features_high_risk_payload():
 
-    normalized_data = normalize_features(
+    dataframe = build_dataframe(
         HIGH_RISK_PREDICTION_PAYLOAD
     )
 
+    normalized, scaler = normalize_features(
+        dataframe
+    )
+
     assert (
-        normalized_data["Future_Hopelessness"]
-        >= 0
+        normalized.iloc[0][
+            "Future_Hopelessness"
+        ] >= 0
     )
 
 
-def test_scale_features_handles_empty_payload():
-
-    with pytest.raises(
-        (ValueError, TypeError, KeyError)
-    ):
-
-        scale_features({})
-
-
-def test_normalize_features_handles_invalid_input():
+def test_normalize_features_invalid_input():
 
     with pytest.raises(
         (TypeError, AttributeError)
     ):
 
         normalize_features(None)
+
+
+# ---------------------------------
+# scale_features
+# ---------------------------------
+
+def test_scale_features_returns_dataframe():
+
+    dataframe = build_dataframe(
+        VALID_PREDICTION_PAYLOAD
+    )
+
+    normalized, scaler = normalize_features(
+        dataframe
+    )
+
+    scaled = scale_features(
+        dataframe,
+        scaler
+    )
+
+    assert isinstance(
+        scaled,
+        pd.DataFrame
+    )
+
+
+def test_scale_features_preserves_columns():
+
+    dataframe = build_dataframe(
+        VALID_PREDICTION_PAYLOAD
+    )
+
+    normalized, scaler = normalize_features(
+        dataframe
+    )
+
+    scaled = scale_features(
+        dataframe,
+        scaler
+    )
+
+    assert set(scaled.columns) == set(
+        dataframe.columns
+    )
+
+
+def test_scale_features_returns_numeric_values():
+
+    dataframe = build_dataframe(
+        VALID_PREDICTION_PAYLOAD
+    )
+
+    normalized, scaler = normalize_features(
+        dataframe
+    )
+
+    scaled = scale_features(
+        dataframe,
+        scaler
+    )
+
+    for value in scaled.iloc[0]:
+
+        assert isinstance(
+            value,
+            (int, float)
+        )
+
+
+def test_scale_features_empty_dataframe():
+
+    dataframe = pd.DataFrame()
+
+    with pytest.raises(
+        (ValueError, TypeError)
+    ):
+
+        scale_features(
+            dataframe,
+            None
+        )

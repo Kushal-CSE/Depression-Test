@@ -9,52 +9,102 @@ from ml.inference.model_loader import (
 )
 
 
-@patch("ml.inference.model_loader.joblib.load")
+# ---------------------------------
+# load_models
+# ---------------------------------
+
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
 def test_load_models_returns_dictionary(
     mock_joblib_load
 ):
 
     mock_joblib_load.side_effect = [
-        MagicMock(name="svm_model"),
-        MagicMock(name="logistic_model"),
-        MagicMock(name="rf_model")
+        MagicMock(),
+        MagicMock(),
+        MagicMock()
     ]
 
-    loaded_models = load_models()
+    models = load_models()
 
     assert isinstance(
-        loaded_models,
+        models,
         dict
     )
 
 
-@patch("ml.inference.model_loader.joblib.load")
-def test_load_models_contains_expected_models(
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
+def test_load_models_contains_models(
     mock_joblib_load
 ):
 
     mock_joblib_load.side_effect = [
-        MagicMock(name="svm_model"),
-        MagicMock(name="logistic_model"),
-        MagicMock(name="rf_model")
+        MagicMock(),
+        MagicMock(),
+        MagicMock()
     ]
 
-    loaded_models = load_models()
+    models = load_models()
 
-    assert "svm_model" in loaded_models
-    assert "logistic_model" in loaded_models
-    assert "randomforest_model" in loaded_models
+    assert "svm_model" in models
+    assert "logistic_model" in models
+    assert "randomforest_model" in models
 
 
-@patch("ml.inference.model_loader.joblib.load")
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
+def test_load_models_calls_joblib(
+    mock_joblib_load
+):
+
+    mock_joblib_load.side_effect = [
+        MagicMock(),
+        MagicMock(),
+        MagicMock()
+    ]
+
+    load_models()
+
+    assert mock_joblib_load.call_count == 3
+
+
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
+def test_load_models_file_not_found(
+    mock_joblib_load
+):
+
+    mock_joblib_load.side_effect = (
+        FileNotFoundError
+    )
+
+    with pytest.raises(
+        FileNotFoundError
+    ):
+
+        load_models()
+
+
+# ---------------------------------
+# load_feature_orders
+# ---------------------------------
+
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
 def test_load_feature_orders_returns_dictionary(
     mock_joblib_load
 ):
 
     mock_joblib_load.side_effect = [
-        ["feature_1", "feature_2"],
-        ["feature_1", "feature_2"],
-        ["feature_1", "feature_2"]
+        ["feature_1"],
+        ["feature_1"],
+        ["feature_1"]
     ]
 
     feature_orders = load_feature_orders()
@@ -65,8 +115,10 @@ def test_load_feature_orders_returns_dictionary(
     )
 
 
-@patch("ml.inference.model_loader.joblib.load")
-def test_load_feature_orders_contains_expected_keys(
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
+def test_load_feature_orders_contains_keys(
     mock_joblib_load
 ):
 
@@ -83,54 +135,28 @@ def test_load_feature_orders_contains_expected_keys(
     assert "randomforest_features" in feature_orders
 
 
-@patch("ml.inference.model_loader.load_models")
-@patch("ml.inference.model_loader.load_feature_orders")
-def test_get_loaded_models_returns_combined_data(
-    mock_load_feature_orders,
-    mock_load_models
-):
-
-    mock_load_models.return_value = {
-        "svm_model": MagicMock(),
-        "logistic_model": MagicMock(),
-        "randomforest_model": MagicMock()
-    }
-
-    mock_load_feature_orders.return_value = {
-        "svm_features": ["a"],
-        "logistic_features": ["b"],
-        "randomforest_features": ["c"]
-    }
-
-    loaded_resources = get_loaded_models()
-
-    assert isinstance(
-        loaded_resources,
-        dict
-    )
-
-    assert "models" in loaded_resources
-    assert "feature_orders" in loaded_resources
-
-
-@patch("ml.inference.model_loader.joblib.load")
-def test_load_models_raises_file_not_found(
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
+def test_load_feature_orders_calls_joblib(
     mock_joblib_load
 ):
 
-    mock_joblib_load.side_effect = (
-        FileNotFoundError
-    )
+    mock_joblib_load.side_effect = [
+        ["feature_1"],
+        ["feature_1"],
+        ["feature_1"]
+    ]
 
-    with pytest.raises(
-        FileNotFoundError
-    ):
+    load_feature_orders()
 
-        load_models()
+    assert mock_joblib_load.call_count == 3
 
 
-@patch("ml.inference.model_loader.joblib.load")
-def test_load_feature_orders_raises_file_not_found(
+@patch(
+    "ml.inference.model_loader.joblib.load"
+)
+def test_load_feature_orders_file_not_found(
     mock_joblib_load
 ):
 
@@ -145,37 +171,35 @@ def test_load_feature_orders_raises_file_not_found(
         load_feature_orders()
 
 
-@patch("ml.inference.model_loader.joblib.load")
-def test_load_models_calls_joblib_multiple_times(
-    mock_joblib_load
+# ---------------------------------
+# get_loaded_models
+# ---------------------------------
+
+@patch(
+    "ml.inference.model_loader.load_models"
+)
+@patch(
+    "ml.inference.model_loader.load_feature_orders"
+)
+def test_get_loaded_models_returns_data(
+    mock_load_feature_orders,
+    mock_load_models
 ):
 
-    mock_joblib_load.side_effect = [
-        MagicMock(),
-        MagicMock(),
-        MagicMock()
-    ]
+    mock_load_models.return_value = {
+        "svm_model": MagicMock()
+    }
 
-    load_models()
+    mock_load_feature_orders.return_value = {
+        "svm_features": ["feature_1"]
+    }
 
-    assert (
-        mock_joblib_load.call_count == 3
+    loaded = get_loaded_models()
+
+    assert isinstance(
+        loaded,
+        dict
     )
 
-
-@patch("ml.inference.model_loader.joblib.load")
-def test_load_feature_orders_calls_joblib_multiple_times(
-    mock_joblib_load
-):
-
-    mock_joblib_load.side_effect = [
-        ["feature_1"],
-        ["feature_1"],
-        ["feature_1"]
-    ]
-
-    load_feature_orders()
-
-    assert (
-        mock_joblib_load.call_count == 3
-    )
+    assert "models" in loaded
+    assert "feature_orders" in loaded

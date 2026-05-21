@@ -1,18 +1,24 @@
 # app/schemas/prediction_schema.py
 
+from typing import Any, Mapping, Sequence
+
+
 def serialize_model_output(
     prediction: int,
     confidence: float,
     model_name: str
 ) -> dict:
     """
-    Serialize raw model output.
+    Serialize individual model prediction output.
     """
 
     return {
         "model": model_name,
-        "prediction": prediction,
-        "confidence": round(confidence, 4)
+        "prediction": int(prediction),
+        "confidence": round(
+            float(confidence),
+            4
+        )
     }
 
 
@@ -22,35 +28,41 @@ def serialize_prediction_response(
     severity: str,
     recommendation: str | None = None,
     agreement_strength: str | None = None,
-    model_results: list[dict] | dict | None = None,
-    **extra_fields
+    model_results: (
+        Sequence[Mapping[str, Any]]
+        | Mapping[str, Any]
+        | None
+    ) = None,
+    **extra_fields: Any
 ) -> dict:
     """
-    Serialize API prediction response.
+    Serialize final prediction API response.
     """
 
     response = {
-        "prediction": prediction,
-        "confidence_score": round(confidence_score, 4),
+        "prediction": int(prediction),
+        "confidence_score": round(
+            float(confidence_score),
+            4
+        ),
         "severity": severity
     }
 
-    if recommendation:
+    if recommendation is not None:
         response["recommendation"] = recommendation
 
-    # CONTRACT ISSUE:
-    # prediction_service passed ensemble metadata into this serializer,
-    # but the serializer accepted only prediction, confidence, severity,
-    # and recommendation. That dropped service-layer inference context
-    # and caused TypeError when unexpected keyword arguments were used.
-    #
-    # Legacy narrower serializer ended after recommendation handling.
-    if agreement_strength:
-        response["agreement_strength"] = agreement_strength
+    # Ensemble metadata support.
+    if agreement_strength is not None:
+        response[
+            "agreement_strength"
+        ] = agreement_strength
 
     if model_results is not None:
         response["model_results"] = model_results
 
-    response.update(extra_fields)
+    # Preserve forward compatibility for
+    # additional ensemble/inference metadata.
+    if extra_fields:
+        response.update(extra_fields)
 
     return response

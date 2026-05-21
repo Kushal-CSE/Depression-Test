@@ -12,8 +12,11 @@ from app.controllers.auth_controller import (
     logout_controller
 )
 
+from app.decorators.jwt_decorator import jwt_required
+
+
 auth_blueprint = Blueprint(
-    "auth_blueprint",
+    "auth",
     __name__,
     url_prefix="/auth"
 )
@@ -34,7 +37,9 @@ def google_login():
     return google_login_controller()
 
 
-@auth_blueprint.route("/google/callback", methods=["POST"])
+# Use GET if Google redirects directly to backend.
+# Use POST only if frontend exchanges auth code manually.
+@auth_blueprint.route("/google/callback", methods=["GET"])
 def google_callback():
     return google_callback_controller()
 
@@ -55,11 +60,13 @@ def verify_email():
 
 
 @auth_blueprint.route("/me", methods=["GET"])
+@jwt_required()
 def get_current_user():
     return get_current_user_controller()
 
 
-@auth_blueprint.route("/logout", methods=["GET"])
+@auth_blueprint.route("/logout", methods=["POST"])
+@jwt_required()
 def logout():
     return logout_controller()
 

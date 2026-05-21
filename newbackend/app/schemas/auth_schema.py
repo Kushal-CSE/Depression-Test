@@ -1,41 +1,56 @@
 # app/schemas/auth_schema.py
 
-def serialize_user(
-    user: dict
-) -> dict:
+from typing import Any, Mapping, Optional
+from datetime import datetime
+
+
+def _serialize_datetime(
+    value: Optional[Any]
+) -> Optional[str]:
     """
-    Serialize user object.
+    Safely serialize datetime values to ISO format.
     """
 
-    # DUPLICATED SERIALIZATION LOGIC:
-    # This schema had a narrower user shape than the repository
-    # serializer. That created two competing API user representations
-    # and increased maintenance risk when user fields changed.
-    #
-    # Legacy narrower response:
-    # return {
-    #     "id": str(user.get("id")),
-    #     "name": user.get("name"),
-    #     "email": user.get("email")
-    # }
+    if value is None:
+        return None
+
+    if isinstance(value, datetime):
+        return value.isoformat()
+
+    return str(value)
+
+
+def serialize_user(
+    user: Mapping[str, Any]
+) -> dict:
+    """
+    Serialize user object into API-safe response payload.
+    """
+
+    user_id = user.get("id") or user.get("_id")
+
     return {
-        "id": str(user.get("id")),
+        "id": str(user_id) if user_id is not None else None,
         "name": user.get("name"),
         "email": user.get("email"),
         "role": user.get("role", "user"),
         "is_verified": user.get("is_verified", False),
-        "created_at": user.get("created_at"),
-        "updated_at": user.get("updated_at")
+        "created_at": _serialize_datetime(
+            user.get("created_at")
+        ),
+        "updated_at": _serialize_datetime(
+            user.get("updated_at")
+        )
     }
 
 
 def serialize_auth_response(
     message: str,
     token: str,
-    user: dict
+    user: Mapping[str, Any]
 ) -> dict:
     """
-    Serialize authentication response.
+    Serialize authentication response payload.
     """
 
     return {

@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -10,11 +10,8 @@ from ml.inference.randomforest_predictor import (
 
 from fixtures.model_fixtures import (
     MOCK_FEATURE_ORDER,
-    MOCK_HIGH_RISK_PREDICTION,
     MOCK_HIGH_RISK_PROBABILITIES,
-    MOCK_LOW_RISK_PREDICTION,
     MOCK_LOW_RISK_PROBABILITIES,
-    MOCK_MODEL_PREDICTION,
     MOCK_MODEL_PROBABILITIES
 )
 
@@ -25,19 +22,18 @@ from fixtures.prediction_payloads import (
 )
 
 
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_returns_prediction(
-    mock_dataframe
-):
+# ---------------------------------
+# predict_randomforest
+# ---------------------------------
 
-    mock_model = MagicMock()
+def test_predict_randomforest_positive_prediction():
 
-    mock_model.predict.return_value = (
-        MOCK_MODEL_PREDICTION
-    )
+    model = MagicMock()
+
+    model.predict.return_value = np.array([1])
 
     prediction = predict_randomforest(
-        model=mock_model,
+        model=model,
         input_data=VALID_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -45,62 +41,14 @@ def test_predict_randomforest_returns_prediction(
     assert prediction == 1
 
 
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_probability_returns_float(
-    mock_dataframe
-):
+def test_predict_randomforest_negative_prediction():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict_proba.return_value = (
-        MOCK_MODEL_PROBABILITIES
-    )
-
-    probability = predict_randomforest_probability(
-        model=mock_model,
-        input_data=VALID_PREDICTION_PAYLOAD,
-        feature_order=MOCK_FEATURE_ORDER
-    )
-
-    assert isinstance(
-        probability,
-        float
-    )
-
-
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_probability_returns_expected_value(
-    mock_dataframe
-):
-
-    mock_model = MagicMock()
-
-    mock_model.predict_proba.return_value = (
-        MOCK_MODEL_PROBABILITIES
-    )
-
-    probability = predict_randomforest_probability(
-        model=mock_model,
-        input_data=VALID_PREDICTION_PAYLOAD,
-        feature_order=MOCK_FEATURE_ORDER
-    )
-
-    assert probability == 0.88
-
-
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_handles_low_risk_prediction(
-    mock_dataframe
-):
-
-    mock_model = MagicMock()
-
-    mock_model.predict.return_value = (
-        MOCK_LOW_RISK_PREDICTION
-    )
+    model.predict.return_value = np.array([0])
 
     prediction = predict_randomforest(
-        model=mock_model,
+        model=model,
         input_data=LOW_RISK_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -108,19 +56,14 @@ def test_predict_randomforest_handles_low_risk_prediction(
     assert prediction == 0
 
 
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_handles_high_risk_prediction(
-    mock_dataframe
-):
+def test_predict_randomforest_high_risk_prediction():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict.return_value = (
-        MOCK_HIGH_RISK_PREDICTION
-    )
+    model.predict.return_value = np.array([1])
 
     prediction = predict_randomforest(
-        model=mock_model,
+        model=model,
         input_data=HIGH_RISK_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -128,49 +71,24 @@ def test_predict_randomforest_handles_high_risk_prediction(
     assert prediction == 1
 
 
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_probability_handles_low_risk(
-    mock_dataframe
-):
+def test_predict_randomforest_calls_model():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict_proba.return_value = (
-        MOCK_LOW_RISK_PROBABILITIES
-    )
+    model.predict.return_value = np.array([1])
 
-    probability = predict_randomforest_probability(
-        model=mock_model,
-        input_data=LOW_RISK_PREDICTION_PAYLOAD,
+    predict_randomforest(
+        model=model,
+        input_data=VALID_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
 
-    assert probability == 0.91
+    model.predict.assert_called_once()
 
 
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_probability_handles_high_risk(
-    mock_dataframe
-):
+def test_predict_randomforest_missing_feature():
 
-    mock_model = MagicMock()
-
-    mock_model.predict_proba.return_value = (
-        MOCK_HIGH_RISK_PROBABILITIES
-    )
-
-    probability = predict_randomforest_probability(
-        model=mock_model,
-        input_data=HIGH_RISK_PREDICTION_PAYLOAD,
-        feature_order=MOCK_FEATURE_ORDER
-    )
-
-    assert probability == 0.97
-
-
-def test_predict_randomforest_raises_key_error():
-
-    mock_model = MagicMock()
+    model = MagicMock()
 
     invalid_payload = {
         "Age": 22
@@ -179,47 +97,107 @@ def test_predict_randomforest_raises_key_error():
     with pytest.raises(KeyError):
 
         predict_randomforest(
-            model=mock_model,
+            model=model,
             input_data=invalid_payload,
             feature_order=MOCK_FEATURE_ORDER
         )
 
 
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_calls_model_predict(
-    mock_dataframe
-):
+# ---------------------------------
+# predict_randomforest_probability
+# ---------------------------------
 
-    mock_model = MagicMock()
+def test_predict_randomforest_probability_returns_float():
 
-    mock_model.predict.return_value = (
-        np.array([1])
+    model = MagicMock()
+
+    model.predict_proba.return_value = (
+        MOCK_MODEL_PROBABILITIES
     )
 
-    predict_randomforest(
-        model=mock_model,
-        input_data=VALID_PREDICTION_PAYLOAD,
-        feature_order=MOCK_FEATURE_ORDER
+    probability = (
+        predict_randomforest_probability(
+            model=model,
+            input_data=VALID_PREDICTION_PAYLOAD,
+            feature_order=MOCK_FEATURE_ORDER
+        )
     )
 
-    mock_model.predict.assert_called_once()
+    assert isinstance(
+        probability,
+        float
+    )
 
 
-@patch("ml.inference.randomforest_predictor.pd.DataFrame")
-def test_predict_randomforest_probability_calls_predict_proba(
-    mock_dataframe
-):
+def test_predict_randomforest_probability_expected_value():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict_proba.return_value = (
+    model.predict_proba.return_value = (
+        MOCK_MODEL_PROBABILITIES
+    )
+
+    probability = (
+        predict_randomforest_probability(
+            model=model,
+            input_data=VALID_PREDICTION_PAYLOAD,
+            feature_order=MOCK_FEATURE_ORDER
+        )
+    )
+
+    assert probability == 0.88
+
+
+def test_predict_randomforest_probability_low_risk():
+
+    model = MagicMock()
+
+    model.predict_proba.return_value = (
+        MOCK_LOW_RISK_PROBABILITIES
+    )
+
+    probability = (
+        predict_randomforest_probability(
+            model=model,
+            input_data=LOW_RISK_PREDICTION_PAYLOAD,
+            feature_order=MOCK_FEATURE_ORDER
+        )
+    )
+
+    assert probability == 0.91
+
+
+def test_predict_randomforest_probability_high_risk():
+
+    model = MagicMock()
+
+    model.predict_proba.return_value = (
+        MOCK_HIGH_RISK_PROBABILITIES
+    )
+
+    probability = (
+        predict_randomforest_probability(
+            model=model,
+            input_data=HIGH_RISK_PREDICTION_PAYLOAD,
+            feature_order=MOCK_FEATURE_ORDER
+        )
+    )
+
+    assert probability == 0.97
+
+
+def test_predict_randomforest_probability_calls_model():
+
+    model = MagicMock()
+
+    model.predict_proba.return_value = (
         MOCK_MODEL_PROBABILITIES
     )
 
     predict_randomforest_probability(
-        model=mock_model,
+        model=model,
         input_data=VALID_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
 
-    mock_model.predict_proba.assert_called_once()
+    model.predict_proba.assert_called_once()

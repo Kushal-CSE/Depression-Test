@@ -1,87 +1,229 @@
-import os
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 import requests
+
+from flask import current_app
+from requests.exceptions import (
+    RequestException
+)
 
 
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
 
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+REQUEST_TIMEOUT = 10
 
 
-def get_google_provider_config() -> Dict[str, Any]:
+def get_google_provider_config(
+) -> Optional[Dict[str, Any]]:
     """
-    Fetch Google OAuth provider metadata.
+    Fetch Google OAuth/OpenID provider
+    configuration.
     """
 
-    response = requests.get(
-        GOOGLE_DISCOVERY_URL,
-        timeout=10
+    try:
+
+        response = requests.get(
+            GOOGLE_DISCOVERY_URL,
+            timeout=REQUEST_TIMEOUT
+        )
+
+        response.raise_for_status()
+
+        provider_config = response.json()
+
+        required_keys = [
+            "authorization_endpoint",
+            "token_endpoint",
+            "userinfo_endpoint"
+        ]
+
+        for key in required_keys:
+
+            if key not in provider_config:
+                return None
+
+        return provider_config
+
+    except (
+        RequestException,
+        ValueError
+    ):
+        return None
+
+
+def exchange_auth_code(
+    code: str
+) -> Optional[Dict[str, Any]]:
+    """
+    Exchange Google authorization code
+    for OAuth tokens.
+    """
+
+    if not code:
+        return None
+
+    provider_config = (
+        get_google_provider_config()
     )
 
-    response.raise_for_status()
+    if not provider_config:
+        return None
 
-    return response.json()
+    token_endpoint = provider_config.get(
+        "token_endpoint"
+    )
 
+    if not token_endpoint:
+        return None
 
-def exchange_auth_code(code: str) -> Optional[Dict[str, Any]]:
-    """
-    Exchange Google authorization code for tokens.
-    """
+    client_id = current_app.config.get(
+        "GOOGLE_CLIENT_ID"
+    )
 
-    provider_config = get_google_provider_config()
+    client_secret = current_app.config.get(
+        "GOOGLE_CLIENT_SECRET"
+    )
 
-    token_endpoint = provider_config["token_endpoint"]
+    redirect_uri = current_app.config.get(
+        "GOOGLE_REDIRECT_URI"
+    )
+
+    if (
+        not client_id
+        or not client_secret
+        or not redirect_uri
+    ):
+        return None
 
     payload = {
-        "client_id": GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
+        "client_id": client_id,
+        "client_secret": client_secret,
         "code": code,
         "grant_type": "authorization_code",
-        "redirect_uri": GOOGLE_REDIRECT_URI
+        "redirect_uri": redirect_uri
     }
 
     headers = {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": (
+            "application/"
+            "x-www-form-urlencoded"
+        )
     }
 
-    response = requests.post(
-        token_endpoint,
-        data=payload,
-        headers=headers,
-        timeout=10
-    )
+    try:
 
-    if response.status_code != 200:
+        response = requests.post(
+            token_endpoint,
+            data=payload,
+            headers=headers,
+            timeout=REQUEST_TIMEOUT
+        )
+
+        response.raise_for_status()
+
+        token_data = response.json()
+
+        if (
+            "access_token"
+            not in token_data
+        ):
+            return None
+
+        return {
+            "access_token": (
+                token_data.get(
+                    "access_token"
+                )
+            ),
+            "id_token": token_data.get(
+                "id_token"
+            ),
+            "expires_in": token_data.get(
+                "expires_in"
+            ),
+            "token_type": token_data.get(
+                "token_type"
+            )
+        }
+
+    except (
+        RequestException,
+        ValueError
+    ):
         return None
-
-    return response.json()
 
 
 def get_google_user_info(
     access_token: str
 ) -> Optional[Dict[str, Any]]:
     """
-    Retrieve authenticated Google user profile.
+    Retrieve authenticated Google
+    user profile information.
     """
 
-    provider_config = get_google_provider_config()
-
-    userinfo_endpoint = provider_config["userinfo_endpoint"]
-
-    response = requests.get(
-        userinfo_endpoint,
-        headers={
-            "Authorization": f"Bearer {access_token}"
-        },
-        timeout=10
-    )
-
-    if response.status_code != 200:
+    if not access_token:
         return None
 
-    return response.json()
+    provider_config = (
+        get_google_provider_config()
+    )
+
+    if not provider_config:
+        return None
+
+    userinfo_endpoint = (
+        provider_config.get(
+            "userinfo_endpoint"
+        )
+    )
+
+    if not userinfo_endpoint:
+        return None
+
+    try:
+
+        response = requests.get(
+            userinfo_endpoint,
+            headers={
+                "Authorization": (
+                    f"Bearer {access_token}"
+                )
+            },
+            timeout=REQUEST_TIMEOUT
+        )
+
+        response.raise_for_status()
+
+        user_data = response.json()
+
+        required_fields = [
+            "sub",
+            "email",
+            "name"
+        ]
+
+        for field in required_fields:
+
+            if not user_data.get(field):
+                return None
+
+        return {
+            "sub": user_data.get("sub"),
+            "email": user_data.get("email"),
+            "name": user_data.get("name"),
+            "picture": user_data.get(
+                "picture"
+            ),
+            "email_verified": user_data.get(
+                "email_verified",
+                False
+            )
+        }
+
+    except (
+        RequestException,
+        ValueError
+    ):
+        return None

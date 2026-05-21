@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -10,11 +10,8 @@ from ml.inference.logistic_predictor import (
 
 from fixtures.model_fixtures import (
     MOCK_FEATURE_ORDER,
-    MOCK_HIGH_RISK_PREDICTION,
     MOCK_HIGH_RISK_PROBABILITIES,
-    MOCK_LOW_RISK_PREDICTION,
     MOCK_LOW_RISK_PROBABILITIES,
-    MOCK_MODEL_PREDICTION,
     MOCK_MODEL_PROBABILITIES
 )
 
@@ -25,19 +22,18 @@ from fixtures.prediction_payloads import (
 )
 
 
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_returns_prediction(
-    mock_dataframe
-):
+# ---------------------------------
+# predict_logistic
+# ---------------------------------
 
-    mock_model = MagicMock()
+def test_predict_logistic_positive_prediction():
 
-    mock_model.predict.return_value = (
-        MOCK_MODEL_PREDICTION
-    )
+    model = MagicMock()
+
+    model.predict.return_value = np.array([1])
 
     prediction = predict_logistic(
-        model=mock_model,
+        model=model,
         input_data=VALID_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -45,19 +41,82 @@ def test_predict_logistic_returns_prediction(
     assert prediction == 1
 
 
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_probability_returns_float(
-    mock_dataframe
-):
+def test_predict_logistic_negative_prediction():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict_proba.return_value = (
+    model.predict.return_value = np.array([0])
+
+    prediction = predict_logistic(
+        model=model,
+        input_data=LOW_RISK_PREDICTION_PAYLOAD,
+        feature_order=MOCK_FEATURE_ORDER
+    )
+
+    assert prediction == 0
+
+
+def test_predict_logistic_high_risk_prediction():
+
+    model = MagicMock()
+
+    model.predict.return_value = np.array([1])
+
+    prediction = predict_logistic(
+        model=model,
+        input_data=HIGH_RISK_PREDICTION_PAYLOAD,
+        feature_order=MOCK_FEATURE_ORDER
+    )
+
+    assert prediction == 1
+
+
+def test_predict_logistic_calls_model():
+
+    model = MagicMock()
+
+    model.predict.return_value = np.array([1])
+
+    predict_logistic(
+        model=model,
+        input_data=VALID_PREDICTION_PAYLOAD,
+        feature_order=MOCK_FEATURE_ORDER
+    )
+
+    model.predict.assert_called_once()
+
+
+def test_predict_logistic_missing_feature():
+
+    model = MagicMock()
+
+    invalid_payload = {
+        "Age": 22
+    }
+
+    with pytest.raises(KeyError):
+
+        predict_logistic(
+            model=model,
+            input_data=invalid_payload,
+            feature_order=MOCK_FEATURE_ORDER
+        )
+
+
+# ---------------------------------
+# predict_logistic_probability
+# ---------------------------------
+
+def test_predict_logistic_probability_returns_float():
+
+    model = MagicMock()
+
+    model.predict_proba.return_value = (
         MOCK_MODEL_PROBABILITIES
     )
 
     probability = predict_logistic_probability(
-        model=mock_model,
+        model=model,
         input_data=VALID_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -68,19 +127,16 @@ def test_predict_logistic_probability_returns_float(
     )
 
 
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_probability_returns_expected_value(
-    mock_dataframe
-):
+def test_predict_logistic_probability_expected_value():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict_proba.return_value = (
+    model.predict_proba.return_value = (
         MOCK_MODEL_PROBABILITIES
     )
 
     probability = predict_logistic_probability(
-        model=mock_model,
+        model=model,
         input_data=VALID_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -88,59 +144,16 @@ def test_predict_logistic_probability_returns_expected_value(
     assert probability == 0.88
 
 
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_handles_low_risk_prediction(
-    mock_dataframe
-):
+def test_predict_logistic_probability_low_risk():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict.return_value = (
-        MOCK_LOW_RISK_PREDICTION
-    )
-
-    prediction = predict_logistic(
-        model=mock_model,
-        input_data=LOW_RISK_PREDICTION_PAYLOAD,
-        feature_order=MOCK_FEATURE_ORDER
-    )
-
-    assert prediction == 0
-
-
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_handles_high_risk_prediction(
-    mock_dataframe
-):
-
-    mock_model = MagicMock()
-
-    mock_model.predict.return_value = (
-        MOCK_HIGH_RISK_PREDICTION
-    )
-
-    prediction = predict_logistic(
-        model=mock_model,
-        input_data=HIGH_RISK_PREDICTION_PAYLOAD,
-        feature_order=MOCK_FEATURE_ORDER
-    )
-
-    assert prediction == 1
-
-
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_probability_handles_low_risk(
-    mock_dataframe
-):
-
-    mock_model = MagicMock()
-
-    mock_model.predict_proba.return_value = (
+    model.predict_proba.return_value = (
         MOCK_LOW_RISK_PROBABILITIES
     )
 
     probability = predict_logistic_probability(
-        model=mock_model,
+        model=model,
         input_data=LOW_RISK_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -148,19 +161,16 @@ def test_predict_logistic_probability_handles_low_risk(
     assert probability == 0.91
 
 
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_probability_handles_high_risk(
-    mock_dataframe
-):
+def test_predict_logistic_probability_high_risk():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    mock_model.predict_proba.return_value = (
+    model.predict_proba.return_value = (
         MOCK_HIGH_RISK_PROBABILITIES
     )
 
     probability = predict_logistic_probability(
-        model=mock_model,
+        model=model,
         input_data=HIGH_RISK_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
@@ -168,58 +178,18 @@ def test_predict_logistic_probability_handles_high_risk(
     assert probability == 0.97
 
 
-def test_predict_logistic_raises_key_error():
+def test_predict_logistic_probability_calls_model():
 
-    mock_model = MagicMock()
+    model = MagicMock()
 
-    invalid_payload = {
-        "Age": 22
-    }
-
-    with pytest.raises(KeyError):
-
-        predict_logistic(
-            model=mock_model,
-            input_data=invalid_payload,
-            feature_order=MOCK_FEATURE_ORDER
-        )
-
-
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_calls_model_predict(
-    mock_dataframe
-):
-
-    mock_model = MagicMock()
-
-    mock_model.predict.return_value = (
-        np.array([1])
-    )
-
-    predict_logistic(
-        model=mock_model,
-        input_data=VALID_PREDICTION_PAYLOAD,
-        feature_order=MOCK_FEATURE_ORDER
-    )
-
-    mock_model.predict.assert_called_once()
-
-
-@patch("ml.inference.logistic_predictor.pd.DataFrame")
-def test_predict_logistic_probability_calls_predict_proba(
-    mock_dataframe
-):
-
-    mock_model = MagicMock()
-
-    mock_model.predict_proba.return_value = (
+    model.predict_proba.return_value = (
         MOCK_MODEL_PROBABILITIES
     )
 
     predict_logistic_probability(
-        model=mock_model,
+        model=model,
         input_data=VALID_PREDICTION_PAYLOAD,
         feature_order=MOCK_FEATURE_ORDER
     )
 
-    mock_model.predict_proba.assert_called_once()
+    model.predict_proba.assert_called_once()

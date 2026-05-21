@@ -1,3 +1,6 @@
+from typing import Any
+
+
 from ml.inference.model_loader import (
     get_model,
     get_feature_order
@@ -27,36 +30,29 @@ from ml.inference.confidence_analyzer import (
 SUPPORTED_MODELS = {
     "svm": {
         "predict": predict_svm,
-        "probability": (
-            predict_svm_probability
-        )
+        "probability": predict_svm_probability
     },
 
     "logistic_regression": {
         "predict": predict_logistic,
-        "probability": (
-            predict_logistic_probability
-        )
+        "probability": predict_logistic_probability
     },
 
     "random_forest": {
         "predict": predict_randomforest,
-        "probability": (
-            predict_randomforest_probability
-        )
+        "probability": predict_randomforest_probability
     }
 }
 
 
 def run_all_models(
-    input_data: dict,
+    input_data: dict[str, Any],
     feature_set: str,
     test_type: str,
     model_types: list[str]
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """
-    Run multiple models against
-    the same input payload.
+    Run multiple models on the same input.
     """
 
     results = []
@@ -67,9 +63,12 @@ def run_all_models(
     )
 
     if not feature_order:
-        return []
+        return results
 
     for model_type in model_types:
+
+        if model_type not in SUPPORTED_MODELS:
+            continue
 
         model = get_model(
             model_type=model_type,
@@ -80,48 +79,52 @@ def run_all_models(
         if not model:
             continue
 
-        if model_type not in SUPPORTED_MODELS:
+        predictor = SUPPORTED_MODELS[model_type]
+
+        try:
+            prediction = predictor["predict"](
+                model=model,
+                feature_order=feature_order,
+                input_data=input_data
+            )
+
+            probability = predictor["probability"](
+                model=model,
+                feature_order=feature_order,
+                input_data=input_data
+            )
+
+            confidence = calculate_confidence(
+                probability
+            )
+
+            results.append({
+                "model_type": model_type,
+                "prediction": prediction,
+                "confidence": confidence
+            })
+
+        except Exception:
             continue
-
-        predictor = (
-            SUPPORTED_MODELS[model_type]
-        )
-
-        prediction = predictor[
-            "predict"
-        ](
-            model=model,
-            feature_order=feature_order,
-            input_data=input_data
-        )
-
-        probability = predictor[
-            "probability"
-        ](
-            model=model,
-            feature_order=feature_order,
-            input_data=input_data
-        )
-
-        confidence = calculate_confidence(
-            probability
-        )
-
-        results.append({
-            "model_type": model_type,
-            "prediction": prediction,
-            "confidence": confidence
-        })
 
     return results
 
 
 def aggregate_predictions(
-    model_results: list[dict]
-) -> dict:
+    model_results: list[dict[str, Any]]
+) -> dict[str, Any]:
     """
-    Aggregate prediction outputs.
+    Aggregate ensemble predictions.
     """
+
+    if not model_results:
+        return {
+            "final_prediction": None,
+            "agreement_strength": "none",
+            "agreement_ratio": 0.0,
+            "prediction_distribution": {},
+            "average_confidence": 0.0
+        }
 
     predictions = [
         result["prediction"]
@@ -133,24 +136,13 @@ def aggregate_predictions(
         for result in model_results
     ]
 
-    agreement = (
-        calculate_agreement_strength(
-            predictions
-        )
+    agreement = calculate_agreement_strength(
+        predictions
     )
 
-    # RUNTIME BUG:
-    # Aggregation divided by the number of confidence scores without
-    # guarding the no-models case. Missing model artifacts or unsupported
-    # model_types could therefore crash the service layer.
-    #
-    # Legacy risky calculation:
-    # average_confidence = sum(confidence_scores) / len(confidence_scores)
     average_confidence = (
         sum(confidence_scores)
         / len(confidence_scores)
-        if confidence_scores
-        else 0.0
     )
 
     return {
@@ -178,11 +170,11 @@ def aggregate_predictions(
 
 
 def generate_ensemble_output(
-    input_data: dict,
+    input_data: dict[str, Any],
     feature_set: str,
     test_type: str,
     model_types: list[str]
-) -> dict:
+) -> dict[str, Any]:
     """
     Complete ensemble prediction flow.
     """
@@ -194,10 +186,8 @@ def generate_ensemble_output(
         model_types=model_types
     )
 
-    aggregated_result = (
-        aggregate_predictions(
-            model_results
-        )
+    aggregated_result = aggregate_predictions(
+        model_results
     )
 
     return {

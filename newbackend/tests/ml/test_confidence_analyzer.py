@@ -6,19 +6,11 @@ from ml.inference.confidence_analyzer import (
 )
 
 
-def test_calculate_confidence_returns_float():
+# -------------------------
+# Confidence Tests
+# -------------------------
 
-    confidence = calculate_confidence(
-        [0.91, 0.88, 0.95]
-    )
-
-    assert isinstance(
-        confidence,
-        float
-    )
-
-
-def test_calculate_confidence_returns_expected_average():
+def test_calculate_confidence_average():
 
     confidence = calculate_confidence(
         [0.90, 0.80, 1.00]
@@ -27,7 +19,7 @@ def test_calculate_confidence_returns_expected_average():
     assert confidence == 0.90
 
 
-def test_calculate_confidence_handles_single_value():
+def test_calculate_confidence_single_value():
 
     confidence = calculate_confidence(
         [0.97]
@@ -36,7 +28,7 @@ def test_calculate_confidence_handles_single_value():
     assert confidence == 0.97
 
 
-def test_calculate_confidence_handles_zero_values():
+def test_calculate_confidence_zero_values():
 
     confidence = calculate_confidence(
         [0.0, 0.0, 0.0]
@@ -45,37 +37,26 @@ def test_calculate_confidence_handles_zero_values():
     assert confidence == 0.0
 
 
-def test_calculate_confidence_handles_high_confidence():
+def test_calculate_confidence_returns_float():
 
     confidence = calculate_confidence(
-        [0.99, 0.98, 0.97]
+        [0.91, 0.88, 0.95]
     )
 
-    assert confidence >= 0.97
+    assert isinstance(confidence, float)
 
 
-def test_calculate_confidence_raises_error_on_empty_list():
+def test_calculate_confidence_empty_input():
 
-    with pytest.raises(
-        (ValueError, ZeroDivisionError)
-    ):
-
+    with pytest.raises(ValueError):
         calculate_confidence([])
 
 
-def test_calculate_agreement_strength_returns_string():
+# -------------------------
+# Agreement Strength Tests
+# -------------------------
 
-    agreement = calculate_agreement_strength(
-        [1, 1, 1]
-    )
-
-    assert isinstance(
-        agreement,
-        str
-    )
-
-
-def test_calculate_agreement_strength_detects_strong_agreement():
+def test_agreement_strength_strong():
 
     agreement = calculate_agreement_strength(
         [1, 1, 1]
@@ -83,13 +64,13 @@ def test_calculate_agreement_strength_detects_strong_agreement():
 
     assert agreement.lower() in [
         "strong",
-        "high",
         "strong agreement",
+        "high",
         "high agreement"
     ]
 
 
-def test_calculate_agreement_strength_detects_partial_agreement():
+def test_agreement_strength_partial():
 
     agreement = calculate_agreement_strength(
         [1, 1, 0]
@@ -97,13 +78,13 @@ def test_calculate_agreement_strength_detects_partial_agreement():
 
     assert agreement.lower() in [
         "moderate",
-        "partial",
         "moderate agreement",
+        "partial",
         "partial agreement"
     ]
 
 
-def test_calculate_agreement_strength_detects_low_agreement():
+def test_agreement_strength_low():
 
     agreement = calculate_agreement_strength(
         [1, 0, 1, 0]
@@ -111,28 +92,22 @@ def test_calculate_agreement_strength_detects_low_agreement():
 
     assert agreement.lower() in [
         "low",
-        "weak",
         "low agreement",
+        "weak",
         "weak agreement"
     ]
 
 
-def test_calculate_agreement_strength_handles_single_prediction():
+def test_agreement_strength_single_prediction():
 
     agreement = calculate_agreement_strength(
         [1]
     )
 
-    assert isinstance(
-        agreement,
-        str
-    )
+    assert isinstance(agreement, str)
 
 
-def test_calculate_agreement_strength_raises_error_on_empty_list():
+def test_agreement_strength_empty_input():
 
-    with pytest.raises(
-        (ValueError, ZeroDivisionError)
-    ):
-
+    with pytest.raises(ValueError):
         calculate_agreement_strength([])

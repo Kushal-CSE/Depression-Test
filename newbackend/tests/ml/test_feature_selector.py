@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from ml.preprocessing.feature_selector import (
@@ -30,129 +31,151 @@ X3_FEATURES = [
 ]
 
 
-def test_select_x1_features_returns_dictionary():
+# ---------------------------------
+# Helpers
+# ---------------------------------
 
-    selected_features = select_x1_features(
-        VALID_PREDICTION_PAYLOAD
+def build_dataframe():
+
+    return pd.DataFrame(
+        [VALID_PREDICTION_PAYLOAD]
+    )
+
+
+# ---------------------------------
+# select_x1_features
+# ---------------------------------
+
+def test_select_x1_features_returns_dataframe():
+
+    dataframe = build_dataframe()
+
+    selected = select_x1_features(
+        dataframe
     )
 
     assert isinstance(
-        selected_features,
-        dict
+        selected,
+        pd.DataFrame
     )
 
 
-def test_select_x1_features_contains_expected_fields():
+def test_select_x1_features_contains_expected_columns():
 
-    selected_features = select_x1_features(
-        VALID_PREDICTION_PAYLOAD
+    dataframe = build_dataframe()
+
+    selected = select_x1_features(
+        dataframe
     )
 
     for feature in X1_FEATURES:
 
-        assert feature in selected_features
+        assert feature in selected.columns
 
 
-def test_select_x1_features_excludes_unrelated_fields():
+def test_select_x1_features_excludes_unrelated_columns():
 
-    selected_features = select_x1_features(
-        VALID_PREDICTION_PAYLOAD
+    dataframe = build_dataframe()
+
+    selected = select_x1_features(
+        dataframe
     )
 
-    assert (
-        "Gender" not in selected_features
-    )
-
-
-def test_select_x3_features_returns_dictionary():
-
-    selected_features = select_x3_features(
-        VALID_PREDICTION_PAYLOAD
-    )
-
-    assert isinstance(
-        selected_features,
-        dict
-    )
-
-
-def test_select_x3_features_contains_expected_fields():
-
-    selected_features = select_x3_features(
-        VALID_PREDICTION_PAYLOAD
-    )
-
-    for feature in X3_FEATURES:
-
-        assert feature in selected_features
-
-
-def test_select_x3_features_preserves_values():
-
-    selected_features = select_x3_features(
-        VALID_PREDICTION_PAYLOAD
-    )
-
-    assert (
-        selected_features["Age"] == 22
-    )
-
-    assert (
-        selected_features["Gender"] == 1
-    )
+    assert "Gender" not in selected.columns
 
 
 def test_select_x1_features_returns_subset():
 
-    selected_features = select_x1_features(
-        VALID_PREDICTION_PAYLOAD
+    dataframe = build_dataframe()
+
+    selected = select_x1_features(
+        dataframe
     )
 
     assert (
-        len(selected_features)
-        < len(VALID_PREDICTION_PAYLOAD)
+        len(selected.columns)
+        < len(dataframe.columns)
     )
 
 
-def test_select_x3_features_returns_subset():
+def test_select_x1_features_missing_column():
 
-    selected_features = select_x3_features(
-        VALID_PREDICTION_PAYLOAD
+    dataframe = build_dataframe().drop(
+        columns=["Melancholic"]
     )
-
-    assert (
-        len(selected_features)
-        < len(VALID_PREDICTION_PAYLOAD)
-    )
-
-
-def test_select_x1_features_handles_missing_feature():
-
-    incomplete_payload = {
-        key: value
-        for key, value in
-        VALID_PREDICTION_PAYLOAD.items()
-        if key != "Melancholic"
-    }
 
     with pytest.raises(KeyError):
 
         select_x1_features(
-            incomplete_payload
+            dataframe
         )
 
 
-def test_select_x3_features_handles_missing_feature():
+# ---------------------------------
+# select_x3_features
+# ---------------------------------
 
-    incomplete_payload = {
-        key: value
-        for key, value in
-        VALID_PREDICTION_PAYLOAD.items()
-        if key != "Age"
-    }
+def test_select_x3_features_returns_dataframe():
+
+    dataframe = build_dataframe()
+
+    selected = select_x3_features(
+        dataframe
+    )
+
+    assert isinstance(
+        selected,
+        pd.DataFrame
+    )
+
+
+def test_select_x3_features_contains_expected_columns():
+
+    dataframe = build_dataframe()
+
+    selected = select_x3_features(
+        dataframe
+    )
+
+    for feature in X3_FEATURES:
+
+        assert feature in selected.columns
+
+
+def test_select_x3_features_preserves_values():
+
+    dataframe = build_dataframe()
+
+    selected = select_x3_features(
+        dataframe
+    )
+
+    assert selected.iloc[0]["Age"] == 22
+    assert selected.iloc[0]["Gender"] == 1
+
+
+def test_select_x3_features_returns_subset():
+
+    dataframe = build_dataframe()
+
+    selected = select_x3_features(
+        dataframe
+    )
+
+    assert (
+        len(selected.columns)
+        < len(dataframe.columns)
+    )
+
+
+def test_select_x3_features_missing_column():
+
+    dataframe = build_dataframe().drop(
+        columns=["Age"]
+    )
 
     with pytest.raises(KeyError):
 
         select_x3_features(
-            incomplete_payload
+            dataframe
         )

@@ -1,4 +1,4 @@
-from flask import Request, Response, request
+from flask import Response, request, g
 
 from app.utils.security import sanitize_input
 
@@ -6,10 +6,40 @@ from app.utils.security import sanitize_input
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "X-XSS-Protection": "1; mode=block",
-    "Referrer-Policy": "no-referrer",
-    "Content-Security-Policy": "default-src 'self'",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Content-Security-Policy": (
+        "default-src 'self'; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "frame-ancestors 'none'"
+    ),
+    "Permissions-Policy": (
+        "camera=(), microphone=(), geolocation=()"
+    ),
 }
+
+
+def _sanitize_value(value):
+    """
+    Recursively sanitize JSON-compatible values.
+    """
+
+    if isinstance(value, str):
+        return sanitize_input(value)
+
+    if isinstance(value, dict):
+        return {
+            key: _sanitize_value(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, list):
+        return [
+            _sanitize_value(item)
+            for item in value
+        ]
+
+    return value
 
 
 def apply_security_headers(response: Response) -> Response:
@@ -26,10 +56,10 @@ def apply_security_headers(response: Response) -> Response:
 
 def sanitize_request() -> None:
     """
-    Sanitize incoming request payload.
+    Sanitize incoming JSON payloads.
 
-    This performs lightweight sanitization only.
-    Validation logic belongs to validators.
+    Sanitized data is stored inside Flask g.
+    Validation responsibility belongs to validators.
     """
 
     if not request.is_json:
@@ -37,17 +67,7 @@ def sanitize_request() -> None:
 
     request_data = request.get_json(silent=True)
 
-    if not isinstance(request_data, dict):
+    if request_data is None:
         return
 
-    sanitized_data = {}
-
-    for key, value in request_data.items():
-
-        if isinstance(value, str):
-            sanitized_data[key] = sanitize_input(value)
-        else:
-            sanitized_data[key] = value
-
-    # Store sanitized payload inside request context
-    request.sanitized_json = sanitized_data
+    g.sanitized_json = _sanitize_value(request_data)

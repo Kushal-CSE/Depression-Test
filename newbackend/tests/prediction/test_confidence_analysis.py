@@ -1,376 +1,321 @@
-import pytest
-
-from ml.inference.confidence_analyzer import (
-    calculate_confidence,
-    calculate_agreement_strength
-)
+import copy
 
 
-def test_calculate_confidence_returns_float():
-    """
-    Confidence calculation should return float.
-    """
+VALID_PAYLOAD = {
+    "Academic Status": 2,
+    "Age": 22,
+    "Agitation_Level": 1,
+    "Alcohol_Consumption": 0,
+    "Anhedonia_No_Joy": 1,
+    "Crying_Frequency": 1,
+    "Difficulty_Focusing": 1,
+    "Difficulty_Speaking_Socially": 1,
+    "Easy_Fatigue": 1,
+    "Emotional_Alignment_Frequency": 1,
+    "Fatigue_Frequency": 1,
+    "Fear_Something_Bad": 1,
+    "Feeling_Down": 1,
+    "Feeling_Insignificant": 1,
+    "Feels_Others_Are_Kind": 1,
+    "Feels_Pitied": 1,
+    "Financial_Pressure": 0,
+    "Future_Hopelessness": 1,
+    "Gender": 1,
+    "Has_Debts": 0,
+    "High_Appetite": 1,
+    "Hopelessness_EndFeeling": 1,
+    "Indecisiveness": 1,
+    "Insomnia": 1,
+    "Interest_Loss": 1,
+    "Irritability": 1,
+    "Isolation_Frequency": 1,
+    "Lack_of_Pleasure": 1,
+    "Life_Feels_Hard": 1,
+    "Loneliness_Frequency": 1,
+    "Lost_Someone_Recently": 0,
+    "Low_Appetite": 1,
+    "Low_Concentration": 1,
+    "Meaninglessness": 1,
+    "Melancholic": 1,
+    "No_Support_Frequency": 1,
+    "On_Medication": 0,
+    "Performance_Decline": 1,
+    "Physical_Activity": 1,
+    "Presence_Not_Genuine_Frequency": 1,
+    "Recent_Abuse_Experience": 0,
+    "Relationship_Status_Divorced": 0,
+    "Relationship_Status_In a Relationship": 0,
+    "Relationship_Status_Married": 0,
+    "Relationship_Status_Single": 1,
+    "Relationships_Unimportant_Level": 1,
+    "Residential_Area_Hall": 1,
+    "Residential_Area_Outside Hall": 0,
+    "Residential_Area_With family": 0,
+    "Restlessness": 1,
+    "Satisfied_Living_Environment": 1,
+    "Self_Confidence_Erosion": 1,
+    "Self_Perceived_Failure": 1,
+    "Share_Feelings_Lack": 1,
+    "Significant_Ailments": 0,
+    "Sleep_Duration": 7,
+    "Smoking": 0,
+    "Social Economic Status": 3,
+    "Social_LeftOut_Level": 1,
+    "Social_Media_Hours": 4,
+    "Social_Withdrawal": 1,
+    "Suicidal_Thoughts": 0,
+    "Work_While_Study": 0,
+    "Workload_Academic_Demand": 1
+}
 
-    probabilities = [
-        0.12,
-        0.88
-    ]
 
-    confidence = calculate_confidence(
-        probabilities
+def test_predict_endpoint_success(
+    client,
+    auth_headers
+):
+
+    response = client.post(
+        "/predict",
+        json=VALID_PAYLOAD,
+        headers=auth_headers
+    )
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+
+    expected_fields = {
+        "prediction",
+        "confidence_score",
+        "severity",
+        "model_used"
+    }
+
+    assert expected_fields.issubset(
+        data.keys()
+    )
+
+
+def test_predict_endpoint_returns_valid_response(
+    client,
+    auth_headers
+):
+
+    response = client.post(
+        "/predict",
+        json=VALID_PAYLOAD,
+        headers=auth_headers
+    )
+
+    data = response.get_json()
+
+    assert isinstance(
+        data["prediction"],
+        int
     )
 
     assert isinstance(
-        confidence,
+        data["confidence_score"],
         float
     )
 
-
-def test_calculate_confidence_within_valid_range():
-    """
-    Confidence must remain between 0 and 1.
-    """
-
-    probabilities = [
-        0.20,
-        0.80
-    ]
-
-    confidence = calculate_confidence(
-        probabilities
+    assert isinstance(
+        data["severity"],
+        str
     )
 
-    assert 0.0 <= confidence <= 1.0
-
-
-def test_calculate_confidence_high_probability():
-    """
-    High probability should produce
-    high confidence.
-    """
-
-    probabilities = [
-        0.01,
-        0.99
-    ]
-
-    confidence = calculate_confidence(
-        probabilities
+    assert isinstance(
+        data["model_used"],
+        str
     )
 
-    assert confidence > 0.9
-
-
-def test_calculate_confidence_low_probability():
-    """
-    Weak probabilities should produce
-    lower confidence.
-    """
-
-    probabilities = [
-        0.49,
-        0.51
-    ]
-
-    confidence = calculate_confidence(
-        probabilities
-    )
-
-    assert confidence < 0.7
-
-
-def test_calculate_confidence_single_class_probability():
-    """
-    Single dominant probability handling.
-    """
-
-    probabilities = [
-        1.0
-    ]
-
-    confidence = calculate_confidence(
-        probabilities
-    )
-
-    assert confidence == 1.0
-
-
-def test_calculate_confidence_rejects_empty_probabilities():
-    """
-    Empty probability input should fail safely.
-    """
-
-    with pytest.raises(Exception):
-
-        calculate_confidence([])
-
-
-def test_calculate_confidence_rejects_invalid_types():
-    """
-    Invalid probability types should fail.
-    """
-
-    probabilities = [
-        "invalid",
-        None
-    ]
-
-    with pytest.raises(Exception):
-
-        calculate_confidence(
-            probabilities
-        )
-
-
-def test_calculate_confidence_handles_zero_probabilities():
-    """
-    Zero probabilities should remain valid.
-    """
-
-    probabilities = [
-        0.0,
+    assert (
         0.0
-    ]
-
-    confidence = calculate_confidence(
-        probabilities
-    )
-
-    assert isinstance(
-        confidence,
-        float
+        <= data["confidence_score"]
+        <= 1.0
     )
 
 
-def test_calculate_confidence_precision():
-    """
-    Confidence precision consistency.
-    """
+def test_predict_endpoint_requires_authentication(
+    client
+):
 
-    probabilities = [
-        0.12345,
-        0.87655
-    ]
-
-    confidence = calculate_confidence(
-        probabilities
+    response = client.post(
+        "/predict",
+        json=VALID_PAYLOAD
     )
 
-    rounded = round(
-        confidence,
-        4
-    )
-
-    assert isinstance(
-        rounded,
-        float
+    assert response.status_code in (
+        401,
+        403
     )
 
 
-def test_calculate_confidence_is_deterministic():
-    """
-    Same probabilities should produce
-    same confidence score.
-    """
+def test_predict_endpoint_rejects_invalid_token(
+    client
+):
 
-    probabilities = [
-        0.25,
-        0.75
-    ]
-
-    result_one = calculate_confidence(
-        probabilities
+    response = client.post(
+        "/predict",
+        json=VALID_PAYLOAD,
+        headers={
+            "Authorization": (
+                "Bearer invalid-token"
+            )
+        }
     )
 
-    result_two = calculate_confidence(
-        probabilities
-    )
-
-    assert result_one == result_two
-
-
-def test_calculate_agreement_strength_returns_float():
-    """
-    Agreement strength should return float.
-    """
-
-    predictions = [
-        1,
-        1,
-        1
-    ]
-
-    agreement = calculate_agreement_strength(
-        predictions
-    )
-
-    assert isinstance(
-        agreement,
-        float
+    assert response.status_code in (
+        401,
+        403
     )
 
 
-def test_calculate_agreement_strength_full_agreement():
-    """
-    All models agreeing should produce
-    max agreement.
-    """
+def test_predict_endpoint_missing_required_feature(
+    client,
+    auth_headers
+):
 
-    predictions = [
-        1,
-        1,
-        1
-    ]
-
-    agreement = calculate_agreement_strength(
-        predictions
+    payload = copy.deepcopy(
+        VALID_PAYLOAD
     )
 
-    assert agreement == 1.0
+    payload.pop("Age")
 
-
-def test_calculate_agreement_strength_partial_agreement():
-    """
-    Partial agreement should reduce score.
-    """
-
-    predictions = [
-        1,
-        1,
-        0
-    ]
-
-    agreement = calculate_agreement_strength(
-        predictions
+    response = client.post(
+        "/predict",
+        json=payload,
+        headers=auth_headers
     )
 
-    assert agreement < 1.0
+    assert response.status_code == 400
 
 
-def test_calculate_agreement_strength_complete_disagreement():
-    """
-    Strong disagreement should reduce
-    agreement score.
-    """
+def test_predict_endpoint_invalid_type(
+    client,
+    auth_headers
+):
 
-    predictions = [
-        0,
-        1,
-        0,
-        1
-    ]
-
-    agreement = calculate_agreement_strength(
-        predictions
+    payload = copy.deepcopy(
+        VALID_PAYLOAD
     )
 
-    assert agreement <= 0.5
+    payload["Age"] = "twenty-two"
 
-
-def test_calculate_agreement_strength_rejects_empty_predictions():
-    """
-    Empty predictions should fail safely.
-    """
-
-    with pytest.raises(Exception):
-
-        calculate_agreement_strength(
-            []
-        )
-
-
-def test_calculate_agreement_strength_single_prediction():
-    """
-    Single prediction should return
-    full agreement.
-    """
-
-    predictions = [1]
-
-    agreement = calculate_agreement_strength(
-        predictions
+    response = client.post(
+        "/predict",
+        json=payload,
+        headers=auth_headers
     )
 
-    assert agreement == 1.0
+    assert response.status_code == 400
 
 
-def test_calculate_agreement_strength_with_all_negative_predictions():
-    """
-    All negative predictions should still
-    produce full agreement.
-    """
+def test_predict_endpoint_invalid_range(
+    client,
+    auth_headers
+):
 
-    predictions = [
-        0,
-        0,
-        0
-    ]
-
-    agreement = calculate_agreement_strength(
-        predictions
+    payload = copy.deepcopy(
+        VALID_PAYLOAD
     )
 
-    assert agreement == 1.0
+    payload["Sleep_Duration"] = 20
 
-
-def test_calculate_agreement_strength_returns_valid_range():
-    """
-    Agreement strength should remain
-    within valid range.
-    """
-
-    predictions = [
-        1,
-        0,
-        1
-    ]
-
-    agreement = calculate_agreement_strength(
-        predictions
+    response = client.post(
+        "/predict",
+        json=payload,
+        headers=auth_headers
     )
 
-    assert 0.0 <= agreement <= 1.0
+    assert response.status_code == 400
 
 
-def test_calculate_agreement_strength_rejects_invalid_types():
-    """
-    Invalid prediction values should fail.
-    """
+def test_predict_endpoint_empty_payload(
+    client,
+    auth_headers
+):
 
-    predictions = [
-        "invalid",
-        None
-    ]
-
-    with pytest.raises(Exception):
-
-        calculate_agreement_strength(
-            predictions
-        )
-
-
-def test_calculate_agreement_strength_is_deterministic():
-    """
-    Same predictions should produce
-    same agreement score.
-    """
-
-    predictions = [
-        1,
-        1,
-        0
-    ]
-
-    result_one = (
-        calculate_agreement_strength(
-            predictions
-        )
+    response = client.post(
+        "/predict",
+        json={},
+        headers=auth_headers
     )
 
-    result_two = (
-        calculate_agreement_strength(
-            predictions
-        )
+    assert response.status_code == 400
+
+
+def test_predict_endpoint_invalid_content_type(
+    client,
+    auth_headers
+):
+
+    response = client.post(
+        "/predict",
+        data="invalid-body",
+        headers={
+            **auth_headers,
+            "Content-Type": "text/plain"
+        }
     )
 
-    assert result_one == result_two
+    assert response.status_code in (
+        400,
+        415
+    )
+
+
+def test_predict_endpoint_large_values(
+    client,
+    auth_headers
+):
+
+    payload = copy.deepcopy(
+        VALID_PAYLOAD
+    )
+
+    payload["Social_Media_Hours"] = 999999
+
+    response = client.post(
+        "/predict",
+        json=payload,
+        headers=auth_headers
+    )
+
+    assert response.status_code == 400
+
+
+def test_predict_endpoint_negative_values(
+    client,
+    auth_headers
+):
+
+    payload = copy.deepcopy(
+        VALID_PAYLOAD
+    )
+
+    payload["Age"] = -10
+
+    response = client.post(
+        "/predict",
+        json=payload,
+        headers=auth_headers
+    )
+
+    assert response.status_code == 400
+
+
+def test_predict_endpoint_returns_json(
+    client,
+    auth_headers
+):
+
+    response = client.post(
+        "/predict",
+        json=VALID_PAYLOAD,
+        headers=auth_headers
+    )
+
+    assert response.content_type.startswith(
+        "application/json"
+    )

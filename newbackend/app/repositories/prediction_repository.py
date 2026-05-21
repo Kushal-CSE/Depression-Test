@@ -1,52 +1,37 @@
 from typing import Dict, Any, List, Optional
+
 from bson import ObjectId
+from bson.errors import InvalidId
+from pymongo.collection import Collection
+from pymongo.errors import PyMongoError
 
-from app.database.collections import predictions_collection
-from app.utils.helpers import get_current_timestamp
+from app.database.collections import (
+    predictions_collection
+)
+from app.utils.helpers import (
+    get_current_timestamp
+)
 
 
-def _get_predictions_collection():
+def _get_predictions_collection() -> Collection:
     """
-    Resolve the predictions collection accessor.
+    Resolve MongoDB predictions collection.
     """
 
-    # ARCHITECTURAL VIOLATION:
-    # This repository previously used predictions_collection as if it
-    # were a PyMongo collection object, even though database/collections.py
-    # exposes accessor functions. That violates the repository/database
-    # boundary and raises attribute errors at runtime.
-    #
-    # Legacy problematic usage:
-    # predictions_collection.insert_one(...)
-    if callable(predictions_collection) and not hasattr(
-        predictions_collection,
-        "insert_one"
-    ):
+    if callable(predictions_collection):
         return predictions_collection()
 
     return predictions_collection
 
 
 def save_prediction(
-    prediction_data: Optional[Dict[str, Any]] = None,
-    **kwargs
+    prediction_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
-    Save prediction result into database.
+    Persist prediction document.
     """
 
-    # BACKWARD COMPATIBILITY:
-    # prediction_service previously called save_prediction(user_id=...,
-    # input_data=..., prediction_data=...). The repository contract is
-    # a single prediction_data dictionary, so kwargs are folded into
-    # that shape without requiring unrelated callers to change.
-    if prediction_data is None:
-        prediction_data = kwargs
-    elif kwargs:
-        prediction_data = {
-            **kwargs,
-            "prediction_data": prediction_data
-        }
+    timestamp = get_current_timestamp()
 
     response_data = prediction_data.get(
         "prediction_data",
@@ -54,8 +39,12 @@ def save_prediction(
     )
 
     document = {
-        "user_id": prediction_data.get("user_id"),
-        "input_data": prediction_data.get("input_data"),
+        "user_id": prediction_data.get(
+            "user_id"
+        ),
+        "input_data": prediction_data.get(
+            "input_data"
+        ),
         "model_results": prediction_data.get(
             "model_results",
             response_data.get("model_results")
@@ -80,18 +69,28 @@ def save_prediction(
         ),
         "recommendation": prediction_data.get(
             "recommendation",
-            response_data.get("recommendation")
+            response_data.get(
+                "recommendation"
+            )
         ),
-        "created_at": get_current_timestamp()
+        "created_at": timestamp
     }
 
     collection = _get_predictions_collection()
 
-    result = collection.insert_one(document)
+    try:
+        result = collection.insert_one(
+            document
+        )
+
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to save prediction"
+        ) from error
 
     document["_id"] = result.inserted_id
 
-    return serialize_prediction(document)
+    return document
 
 
 def get_prediction_history(
@@ -99,73 +98,57 @@ def get_prediction_history(
     limit: int = 20
 ) -> List[Dict[str, Any]]:
     """
-    Retrieve user prediction history.
+    Retrieve prediction history for user.
     """
 
     collection = _get_predictions_collection()
 
-    predictions = collection.find(
-        {"user_id": user_id}
-    ).sort(
-        "created_at",
-        -1
-    )
+    try:
+        predictions_cursor = (
+            collection.find(
+                {"user_id": user_id}
+            )
+            .sort("created_at", -1)
+            .limit(limit)
+        )
 
-    if hasattr(predictions, "limit"):
-        predictions = predictions.limit(limit)
+        predictions = list(
+            predictions_cursor
+        )
 
-    return [
-        serialize_prediction(prediction)
-        for prediction in predictions
-    ]
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to retrieve prediction history"
+        ) from error
+
+    return predictions
 
 
 def get_prediction_by_id(
     prediction_id: str
 ) -> Optional[Dict[str, Any]]:
     """
-    Retrieve single prediction document.
+    Retrieve prediction document by ID.
     """
 
     try:
-        collection = _get_predictions_collection()
+        object_id = ObjectId(
+            prediction_id
+        )
 
-        prediction = collection.find_one({
-            "_id": ObjectId(prediction_id)
-        })
-
-        if not prediction:
-            return None
-
-        return serialize_prediction(prediction)
-
-    except Exception:
+    except InvalidId:
         return None
 
+    collection = _get_predictions_collection()
 
-def serialize_prediction(
-    prediction: Dict[str, Any]
-) -> Dict[str, Any]:
-    """
-    Convert MongoDB prediction document into API-safe response.
-    """
+    try:
+        prediction = collection.find_one({
+            "_id": object_id
+        })
 
-    return {
-        "id": str(prediction["_id"]),
-        "user_id": prediction.get("user_id"),
-        "input_data": prediction.get("input_data"),
-        "model_results": prediction.get("model_results"),
-        "final_prediction": prediction.get("final_prediction"),
-        "prediction": prediction.get(
-            "prediction",
-            prediction.get("final_prediction")
-        ),
-        "confidence_score": prediction.get("confidence_score"),
-        "confidence": prediction.get(
-            "confidence",
-            prediction.get("confidence_score")
-        ),
-        "severity": prediction.get("severity"),
-        "recommendation": prediction.get("recommendation"),
-        "created_at": prediction.get("created_at")
-    }
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to retrieve prediction"
+        ) from error
+
+    return prediction

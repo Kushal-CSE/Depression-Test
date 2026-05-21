@@ -15,10 +15,32 @@ from app.services.google_auth_service import (
     process_google_login
 )
 
+from app.services.jwt_service import extract_token
+
 from app.utils.response import (
     success_response,
     error_response
 )
+
+
+def _get_request_data() -> dict:
+    """
+    Retrieve sanitized request JSON payload safely.
+    """
+
+    if not request.is_json:
+        raise ValueError("Request content-type must be application/json")
+
+    sanitized_data = getattr(
+        request,
+        "sanitized_json",
+        None
+    )
+
+    if sanitized_data is not None:
+        return sanitized_data
+
+    return request.get_json(silent=True) or {}
 
 
 def signup_controller():
@@ -27,7 +49,7 @@ def signup_controller():
     """
 
     try:
-        request_data = request.get_json() or {}
+        request_data = _get_request_data()
 
         result = signup_user(request_data)
 
@@ -37,10 +59,16 @@ def signup_controller():
             status_code=201
         )
 
-    except Exception as error:
+    except ValueError as error:
         return error_response(
             message=str(error),
             status_code=400
+        )
+
+    except Exception:
+        return error_response(
+            message="Signup failed",
+            status_code=500
         )
 
 
@@ -50,7 +78,7 @@ def login_controller():
     """
 
     try:
-        request_data = request.get_json() or {}
+        request_data = _get_request_data()
 
         result = login_user(request_data)
 
@@ -59,10 +87,22 @@ def login_controller():
             data=result
         )
 
-    except Exception as error:
+    except ValueError as error:
+        return error_response(
+            message=str(error),
+            status_code=400
+        )
+
+    except PermissionError as error:
         return error_response(
             message=str(error),
             status_code=401
+        )
+
+    except Exception:
+        return error_response(
+            message="Login failed",
+            status_code=500
         )
 
 
@@ -81,9 +121,9 @@ def google_login_controller():
             }
         )
 
-    except Exception as error:
+    except Exception:
         return error_response(
-            message=str(error),
+            message="Failed to generate Google auth URL",
             status_code=500
         )
 
@@ -94,30 +134,41 @@ def google_callback_controller():
     """
 
     try:
-        request_data = request.get_json() or {}
+        request_data = _get_request_data()
 
-        # CONTRACT ISSUE:
-        # process_google_login() expects an authorization code string,
-        # but the controller passed the full request dictionary. That
-        # violates the controller/service contract and can make the
-        # Google flow fail even with a valid payload.
-        #
-        # Legacy problematic call:
-        # result = process_google_login(request_data)
-        result = process_google_login(
+        auth_code = (
             request_data.get("code")
             or request_data.get("auth_code")
         )
+
+        if not auth_code:
+            raise ValueError(
+                "Authorization code is required"
+            )
+
+        result = process_google_login(auth_code)
 
         return success_response(
             message="Google login successful",
             data=result
         )
 
-    except Exception as error:
+    except ValueError as error:
+        return error_response(
+            message=str(error),
+            status_code=400
+        )
+
+    except PermissionError as error:
         return error_response(
             message=str(error),
             status_code=401
+        )
+
+    except Exception:
+        return error_response(
+            message="Google authentication failed",
+            status_code=500
         )
 
 
@@ -127,7 +178,7 @@ def forgot_password_controller():
     """
 
     try:
-        request_data = request.get_json() or {}
+        request_data = _get_request_data()
 
         result = forgot_password(request_data)
 
@@ -136,10 +187,16 @@ def forgot_password_controller():
             data=result
         )
 
-    except Exception as error:
+    except ValueError as error:
         return error_response(
             message=str(error),
             status_code=400
+        )
+
+    except Exception:
+        return error_response(
+            message="Failed to initiate password reset",
+            status_code=500
         )
 
 
@@ -149,19 +206,24 @@ def reset_password_controller():
     """
 
     try:
-        request_data = request.get_json() or {}
+        request_data = _get_request_data()
 
-        # CONTRACT ISSUE:
-        # reset_password() expects token and new_password arguments,
-        # but the controller passed the whole JSON dictionary. That
-        # violates the controller/service contract and causes a
-        # missing-argument runtime failure.
-        #
-        # Legacy problematic call:
-        # result = reset_password(request_data)
+        token = request_data.get("token")
+        new_password = request_data.get("new_password")
+
+        if not token:
+            raise ValueError(
+                "Reset token is required"
+            )
+
+        if not new_password:
+            raise ValueError(
+                "New password is required"
+            )
+
         result = reset_password(
-            token=request_data.get("token"),
-            new_password=request_data.get("new_password")
+            token=token,
+            new_password=new_password
         )
 
         return success_response(
@@ -169,10 +231,22 @@ def reset_password_controller():
             data=result
         )
 
-    except Exception as error:
+    except ValueError as error:
         return error_response(
             message=str(error),
             status_code=400
+        )
+
+    except PermissionError as error:
+        return error_response(
+            message=str(error),
+            status_code=401
+        )
+
+    except Exception:
+        return error_response(
+            message="Password reset failed",
+            status_code=500
         )
 
 
@@ -182,29 +256,38 @@ def verify_email_controller():
     """
 
     try:
-        request_data = request.get_json() or {}
+        request_data = _get_request_data()
 
-        # CONTRACT ISSUE:
-        # verify_email() expects a token string, but the controller
-        # passed the whole JSON dictionary. That violates the
-        # controller/service contract and causes token verification to
-        # receive the wrong type.
-        #
-        # Legacy problematic call:
-        # result = verify_email(request_data)
-        result = verify_email(
-            request_data.get("token")
-        )
+        token = request_data.get("token")
+
+        if not token:
+            raise ValueError(
+                "Verification token is required"
+            )
+
+        result = verify_email(token)
 
         return success_response(
             message="Email verified successfully",
             data=result
         )
 
-    except Exception as error:
+    except ValueError as error:
         return error_response(
             message=str(error),
             status_code=400
+        )
+
+    except PermissionError as error:
+        return error_response(
+            message=str(error),
+            status_code=401
+        )
+
+    except Exception:
+        return error_response(
+            message="Email verification failed",
+            status_code=500
         )
 
 
@@ -214,7 +297,12 @@ def get_current_user_controller():
     """
 
     try:
-        token = request.headers.get("Authorization")
+        token = extract_token(request)
+
+        if not token:
+            raise PermissionError(
+                "Authentication token is required"
+            )
 
         result = get_current_user(token)
 
@@ -223,10 +311,16 @@ def get_current_user_controller():
             data=result
         )
 
-    except Exception as error:
+    except PermissionError as error:
         return error_response(
             message=str(error),
             status_code=401
+        )
+
+    except Exception:
+        return error_response(
+            message="Failed to fetch current user",
+            status_code=500
         )
 
 
@@ -243,8 +337,8 @@ def logout_controller():
             data=result
         )
 
-    except Exception as error:
+    except Exception:
         return error_response(
-            message=str(error),
-            status_code=400
+            message="Logout failed",
+            status_code=500
         )

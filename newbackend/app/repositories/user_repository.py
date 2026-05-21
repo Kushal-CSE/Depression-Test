@@ -1,103 +1,127 @@
 from typing import Optional, Dict, Any
+
 from bson import ObjectId
+from bson.errors import InvalidId
+from pymongo.collection import Collection
+from pymongo.errors import PyMongoError
 
 from app.database.collections import users_collection
 from app.utils.helpers import get_current_timestamp
 
 
-def _get_users_collection():
+def _get_users_collection() -> Collection:
     """
-    Resolve the users collection accessor.
+    Resolve MongoDB users collection.
     """
 
-    # ARCHITECTURAL VIOLATION:
-    # This repository previously used users_collection as if it were a
-    # PyMongo collection object, even though database/collections.py
-    # exposes accessor functions. That violates the repository/database
-    # boundary and raises attribute errors at runtime.
-    #
-    # Legacy problematic usage:
-    # users_collection.insert_one(...)
-    if callable(users_collection) and not hasattr(
-        users_collection,
-        "insert_one"
-    ):
+    if callable(users_collection):
         return users_collection()
 
     return users_collection
 
 
 def create_user(
-    user_data: Optional[Dict[str, Any]] = None,
-    **kwargs
+    user_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
-    Create a new user document.
+    Create and persist a new user document.
     """
 
-    # BACKWARD COMPATIBILITY:
-    # Some services historically called create_user(name=..., email=...),
-    # while the repository contract accepts a user_data dictionary.
-    # Supporting kwargs avoids a cascading rewrite outside the explicit
-    # violation scope.
-    if user_data is None:
-        user_data = kwargs
+    required_fields = [
+        "name",
+        "email",
+        "password"
+    ]
+
+    missing_fields = [
+        field
+        for field in required_fields
+        if field not in user_data
+    ]
+
+    if missing_fields:
+        raise ValueError(
+            f"Missing required fields: {', '.join(missing_fields)}"
+        )
+
+    timestamp = get_current_timestamp()
 
     document = {
         "name": user_data["name"],
         "email": user_data["email"],
         "password": user_data["password"],
-        "is_verified": False,
-        "role": "user",
-        "created_at": get_current_timestamp(),
-        "updated_at": get_current_timestamp()
+        "role": user_data.get("role", "user"),
+        "is_verified": user_data.get(
+            "is_verified",
+            False
+        ),
+        "created_at": timestamp,
+        "updated_at": timestamp
     }
 
     collection = _get_users_collection()
 
-    result = collection.insert_one(document)
+    try:
+        result = collection.insert_one(document)
+
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to create user document"
+        ) from error
 
     document["_id"] = result.inserted_id
 
-    return serialize_user(document)
+    return document
 
 
-def find_user_by_email(email: str) -> Optional[Dict[str, Any]]:
+def find_user_by_email(
+    email: str
+) -> Optional[Dict[str, Any]]:
     """
-    Find user using email address.
+    Retrieve user document by email.
     """
 
     collection = _get_users_collection()
 
-    user = collection.find_one({
-        "email": email
-    })
+    try:
+        user = collection.find_one(
+            {"email": email}
+        )
 
-    if not user:
-        return None
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to retrieve user by email"
+        ) from error
 
-    return serialize_user(user, include_password=True)
+    return user
 
 
-def find_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+def find_user_by_id(
+    user_id: str
+) -> Optional[Dict[str, Any]]:
     """
-    Find user using MongoDB ObjectId.
+    Retrieve user document by MongoDB ObjectId.
     """
 
     try:
-        collection = _get_users_collection()
+        object_id = ObjectId(user_id)
 
+    except InvalidId:
+        return None
+
+    collection = _get_users_collection()
+
+    try:
         user = collection.find_one({
-            "_id": ObjectId(user_id)
+            "_id": object_id
         })
 
-        if not user:
-            return None
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to retrieve user by ID"
+        ) from error
 
-        return serialize_user(user)
-
-    except Exception:
-        return None
+    return user
 
 
 def update_user(
@@ -105,60 +129,68 @@ def update_user(
     update_data: Dict[str, Any]
 ) -> bool:
     """
-    Update user fields.
+    Update user document fields.
     """
 
-    update_data["updated_at"] = get_current_timestamp()
+    try:
+        object_id = ObjectId(user_id)
+
+    except InvalidId:
+        return False
+
+    update_payload = dict(update_data)
+
+    update_payload["updated_at"] = (
+        get_current_timestamp()
+    )
 
     collection = _get_users_collection()
 
-    result = collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": update_data}
-    )
+    try:
+        result = collection.update_one(
+            {"_id": object_id},
+            {"$set": update_payload}
+        )
 
-    return result.modified_count > 0
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to update user"
+        ) from error
+
+    return result.matched_count > 0
 
 
-def verify_user_email(user_id: str) -> bool:
+def verify_user_email(
+    user_id: str
+) -> bool:
     """
     Mark user email as verified.
     """
 
+    try:
+        object_id = ObjectId(user_id)
+
+    except InvalidId:
+        return False
+
     collection = _get_users_collection()
 
-    result = collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {
-            "$set": {
-                "is_verified": True,
-                "updated_at": get_current_timestamp()
+    try:
+        result = collection.update_one(
+            {"_id": object_id},
+            {
+                "$set": {
+                    "is_verified": True,
+                    "updated_at": (
+                        get_current_timestamp()
+                    )
+                }
             }
-        }
-    )
+        )
 
-    return result.modified_count > 0
+    except PyMongoError as error:
+        raise RuntimeError(
+            "Failed to verify user email"
+        ) from error
 
-
-def serialize_user(
-    user: Dict[str, Any],
-    include_password: bool = False
-) -> Dict[str, Any]:
-    """
-    Convert MongoDB document into API-safe dictionary.
-    """
-
-    serialized_user = {
-        "id": str(user["_id"]),
-        "name": user.get("name"),
-        "email": user.get("email"),
-        "role": user.get("role", "user"),
-        "is_verified": user.get("is_verified", False),
-        "created_at": user.get("created_at"),
-        "updated_at": user.get("updated_at")
-    }
-
-    if include_password:
-        serialized_user["password"] = user.get("password")
-
-    return serialized_user
+    return result.matched_count > 0

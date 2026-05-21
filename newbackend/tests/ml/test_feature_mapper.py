@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from ml.preprocessing.feature_mapper import (
@@ -11,79 +12,30 @@ from fixtures.prediction_payloads import (
 )
 
 
-def test_map_features_returns_dictionary():
+# ---------------------------------
+# map_features
+# ---------------------------------
 
-    mapped_features = map_features(
+def test_map_features_returns_dataframe():
+
+    dataframe = map_features(
         VALID_PREDICTION_PAYLOAD
     )
 
     assert isinstance(
-        mapped_features,
-        dict
+        dataframe,
+        pd.DataFrame
     )
 
 
 def test_map_features_preserves_values():
 
-    mapped_features = map_features(
+    dataframe = map_features(
         VALID_PREDICTION_PAYLOAD
     )
 
-    assert (
-        mapped_features["Age"] == 22
-    )
-
-    assert (
-        mapped_features["Gender"] == 1
-    )
-
-
-def test_align_feature_order_returns_list():
-
-    ordered_features = align_feature_order(
-        VALID_PREDICTION_PAYLOAD,
-        list(VALID_PREDICTION_PAYLOAD.keys())
-    )
-
-    assert isinstance(
-        ordered_features,
-        list
-    )
-
-
-def test_align_feature_order_matches_feature_order():
-
-    feature_order = [
-        "Gender",
-        "Age",
-        "Sleep_Duration"
-    ]
-
-    ordered_features = align_feature_order(
-        VALID_PREDICTION_PAYLOAD,
-        feature_order
-    )
-
-    assert ordered_features == [
-        VALID_PREDICTION_PAYLOAD["Gender"],
-        VALID_PREDICTION_PAYLOAD["Age"],
-        VALID_PREDICTION_PAYLOAD["Sleep_Duration"]
-    ]
-
-
-def test_align_feature_order_raises_key_error():
-
-    feature_order = [
-        "Gender",
-        "Unknown_Field"
-    ]
-
-    with pytest.raises(KeyError):
-
-        align_feature_order(
-            VALID_PREDICTION_PAYLOAD,
-            feature_order
-        )
+    assert dataframe.iloc[0]["Age"] == 22
+    assert dataframe.iloc[0]["Gender"] == 1
 
 
 @pytest.mark.parametrize(
@@ -101,27 +53,91 @@ def test_map_features_missing_fields(
         payload_key
     ]
 
-    mapped_features = map_features(
+    dataframe = map_features(
         payload
     )
 
     assert isinstance(
-        mapped_features,
-        dict
+        dataframe,
+        pd.DataFrame
     )
 
 
-def test_align_feature_order_with_full_payload():
+# ---------------------------------
+# align_feature_order
+# ---------------------------------
+
+def test_align_feature_order_returns_dataframe():
+
+    dataframe = map_features(
+        VALID_PREDICTION_PAYLOAD
+    )
+
+    ordered_dataframe = align_feature_order(
+        dataframe,
+        list(VALID_PREDICTION_PAYLOAD.keys())
+    )
+
+    assert isinstance(
+        ordered_dataframe,
+        pd.DataFrame
+    )
+
+
+def test_align_feature_order_matches_feature_order():
+
+    feature_order = [
+        "Gender",
+        "Age",
+        "Sleep_Duration"
+    ]
+
+    dataframe = map_features(
+        VALID_PREDICTION_PAYLOAD
+    )
+
+    ordered_dataframe = align_feature_order(
+        dataframe,
+        feature_order
+    )
+
+    assert list(
+        ordered_dataframe.columns
+    ) == feature_order
+
+
+def test_align_feature_order_raises_key_error():
+
+    dataframe = map_features(
+        VALID_PREDICTION_PAYLOAD
+    )
+
+    with pytest.raises(KeyError):
+
+        align_feature_order(
+            dataframe,
+            [
+                "Gender",
+                "Unknown_Field"
+            ]
+        )
+
+
+def test_align_feature_order_full_payload():
 
     feature_order = list(
         VALID_PREDICTION_PAYLOAD.keys()
     )
 
-    ordered_features = align_feature_order(
-        VALID_PREDICTION_PAYLOAD,
+    dataframe = map_features(
+        VALID_PREDICTION_PAYLOAD
+    )
+
+    ordered_dataframe = align_feature_order(
+        dataframe,
         feature_order
     )
 
     assert len(
-        ordered_features
+        ordered_dataframe.columns
     ) == len(feature_order)
