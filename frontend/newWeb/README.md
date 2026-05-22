@@ -1,326 +1,246 @@
-# MindWell - Depression Assessment Platform
+# Depression Assessment Platform
 
-A modern, responsive React-based frontend for mental health assessments featuring evidence-based screening tests including PHQ-9, BDI-II, CES-D, and an AI-powered assessment tool.
+A modern, user-friendly web application for mental health assessments using validated questionnaires and AI-powered predictions. Built with Next.js 16, React 19, and integrated with a Flask ML backend.
 
 ## Features
 
-### Assessment Tools
-- **PHQ-9**: Patient Health Questionnaire-9 (9 questions, ~5 minutes)
-- **BDI-II**: Beck Depression Inventory-II (21 questions, ~10 minutes)
-- **CES-D**: Center for Epidemiologic Studies Depression Scale (20 questions, ~5 minutes)
-- **AI-Powered Assessment**: Intelligent 8-question evaluation
+### Assessment Options
+- **PHQ-9**: Patient Health Questionnaire (9 questions)
+- **BDI-2**: Beck Depression Inventory (21 questions)
+- **CES-D**: Center for Epidemiological Studies Depression Scale (20 questions)
+- **UCLA-8**: UCLA Loneliness Scale (8 questions)
+- **Complete Assessment**: All 59 questions combined
 
 ### Core Functionality
-- ✅ User authentication (email/password, Google OAuth ready)
-- ✅ Comprehensive dashboard with quick stats
-- ✅ Interactive test interface with progress tracking
-- ✅ Immediate result calculation with interpretations
-- ✅ Personalized recommendations based on scores
-- ✅ User profile management
-- ✅ Responsive design (mobile-first)
-- ✅ Accessibility-first (WCAG 2.1 AA)
+- Interactive multi-step questionnaire interface
+- Real-time answer tracking and progress visualization
+- AI-powered depression severity prediction (0-3 scale)
+- Confidence score for each prediction
+- Personalized mental health recommendations
+- Assessment history with persistence
+- Dashboard for tracking trends
+- Fully responsive design (mobile, tablet, desktop)
 
-### Design & UX
-- Clean, modern medical-grade interface
-- White primary background with balanced blue/green accents
-- Compassionate, non-alarming messaging
-- Smooth animations and transitions
-- Full keyboard navigation support
-- High contrast for accessibility
+## Tech Stack
 
-### Code Quality
-- Built with React 18 + Next.js 16 + TypeScript
-- React Hook Form + Zod for validation
-- Context API for state management
-- Functional components with hooks only
-- Comprehensive error handling
-- Client and server-side validation
-- Security-first approach
+### Frontend
+- **Framework**: Next.js 16 with App Router
+- **UI**: React 19 with shadcn/ui components
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **Data Persistence**: Browser LocalStorage
+
+### Backend Integration
+- **Flask**: Python backend for ML predictions (runs on port 5000)
+- **API**: RESTful endpoint at `/predict` for assessment submissions
 
 ## Project Structure
 
 ```
 app/
-├── auth/
-│   ├── login/
-│   ├── signup/
-│   └── forgot-password/
-├── tests/
-│   └── [testType]/
-├── dashboard/
-├── profile/
-├── layout.tsx
-├── page.tsx (landing)
-└── globals.css
-
-lib/
-├── types.ts              # TypeScript interfaces
-├── schemas.ts            # Zod validation schemas
-├── test-data.ts          # Test questions & scoring logic
-├── auth-context.tsx      # Authentication state
-└── api-client.ts         # Axios instance
+├── page.tsx                 # Landing page with test selection
+├── layout.tsx              # Root layout with providers
+├── test/[testType]/        # Dynamic questionnaire pages
+├── results/                # Results display page
+└── dashboard/              # Assessment history dashboard
 
 components/
-├── form-field.tsx        # Reusable form input wrapper
-├── test-card.tsx         # Test selection card
-├── result-card.tsx       # Result display
-└── ui/                   # shadcn/ui components
+├── QuestionCard.tsx        # Individual question component
+├── NavigationButtons.tsx   # Previous/Next navigation
+├── ResultsDisplay.tsx      # Results visualization
+├── TestSelector.tsx        # Test selection UI
+└── HistoryList.tsx        # Assessment history list
+
+lib/
+├── types/                  # TypeScript type definitions
+├── data/testConfigs.ts    # All question configurations (59 questions)
+├── contexts/              # React Context for state management
+├── api/mlClient.ts        # Flask API integration
+
 ```
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ or bun
-- pnpm (or npm/yarn)
+- Node.js 18+ with pnpm
+- Flask backend running on `http://localhost:5000`
 
 ### Installation
 
-1. **Clone and Install**
+1. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
+
+2. **Start the development server**:
+   ```bash
+   pnpm dev
+   ```
+
+3. **Open in browser**:
+   - Visit `http://localhost:3000`
+
+### Ensure Flask Backend is Running
+
+The application communicates with a Flask backend for ML predictions:
+
 ```bash
-# Install dependencies
-pnpm install
+# In your Flask project directory
+python app.py
 ```
 
-2. **Environment Setup**
-```bash
-# Copy the example environment file
-cp .env.local.example .env.local
+The backend should be running on `http://localhost:5000` and expose the `/predict` endpoint.
 
-# Update .env.local with your configuration
-# NEXT_PUBLIC_API_URL=http://localhost:3001/api
+## How It Works
+
+### Assessment Flow
+1. **Landing Page**: User selects a questionnaire type
+2. **Questionnaire**: Questions are displayed one at a time with scale options
+3. **Progress Tracking**: Real-time progress bar and question counter
+4. **Submission**: Answers are compiled and sent to Flask backend
+5. **Results**: ML model returns severity score (0-3) and confidence
+6. **Display**: Beautiful results page with interpretation and recommendations
+7. **History**: Results saved to localStorage for future reference
+
+### Flask Backend Integration
+
+The application expects the Flask `/predict` endpoint to accept POST requests with the following structure:
+
+```json
+{
+  "Feature_Name_1": 0,
+  "Feature_Name_2": 1,
+  "Feature_Name_3": 2,
+  ...
+}
 ```
 
-3. **Start Development Server**
-```bash
-pnpm dev
+And return responses like:
+
+```json
+{
+  "prediction": 2,
+  "confidence_score": 0.85,
+  "mental_health_tip": ["Get professional help", "Practice self-care", ...]
+}
 ```
 
-The app will be available at `http://localhost:3000`
+## Usage Examples
 
-## Usage
+### Taking an Assessment
+1. Click on any of the 5 test cards on the landing page
+2. Answer questions by clicking on the scale options
+3. Click "Next" to proceed through questions
+4. On the final question, click "Submit Assessment"
+5. Wait for ML prediction and view results
 
-### User Flow
+### Viewing History
+- Click "View Your Assessment History" on the landing page
+- Dashboard shows all past assessments with severity levels
+- Filter by date or severity
+- Click "View Details" to see full results
 
-1. **Landing Page** (`/`)
-   - Overview of assessment tools
-   - Sign up / Sign in links
-   - Feature highlights
+### Data Persistence
+- All assessment results are saved to browser's LocalStorage
+- History persists across browser sessions
+- Results can be cleared from the dashboard
 
-2. **Authentication**
-   - Sign up: `/auth/signup`
-   - Login: `/auth/login`
-   - Forgot password: `/auth/forgot-password`
+## Severity Levels
 
-3. **Dashboard** (`/dashboard`)
-   - View all available tests
-   - Quick stats (tests completed, last assessment)
-   - Recent results
+The ML model returns predictions on a 0-3 scale:
 
-4. **Test Interface** (`/tests/[testType]`)
-   - Start screen with test info
-   - Interactive questions with progress bar
-   - Immediate scoring and results
-   - Personalized recommendations
+- **0 - Minimal/Normal** (Green): No significant depressive symptoms
+- **1 - Mild** (Yellow): Mild depressive symptoms, consider professional guidance
+- **2 - Moderate** (Orange): Moderate depressive symptoms, recommend professional help
+- **3 - Severe/Extreme** (Red): Severe depressive symptoms, seek immediate professional help
 
-5. **Profile** (`/profile`)
-   - View account information
-   - Update profile settings
-   - Security options
-   - Sign out
+## API Integration Details
 
-## Testing the App
+### Feature Mapping
+Questions are mapped to backend features:
+- Each questionnaire has its unique set of questions
+- Questions are mapped to 59 backend features for the ML model
+- Some features may have default values if not answered in that specific test
+- Feature values are normalized to the model's expected ranges
 
-### With Mock Data (No Backend Required)
-
-The app works entirely with client-side logic for assessment calculation. You can:
-
-1. Use the test interface without authentication by modifying `useAuth()` checks
-2. All test questions, scoring logic, and interpretations are included
-3. Results are calculated immediately on form submission
-
-### API Integration (Backend Required)
-
-To fully integrate with a backend:
-
-1. Implement endpoints for:
-   - `POST /auth/login`
-   - `POST /auth/signup`
-   - `GET /auth/me`
-   - `POST /auth/logout`
-   - `POST /auth/forgot-password`
-   - `POST /auth/reset-password`
-   - `POST /auth/google`
-   - `POST /tests/submit`
-   - `GET /tests/history`
-   - `GET /profile`
-   - `PUT /profile`
-
-2. Update the API base URL in `.env.local`
-
-3. Modify `useAuth()` context to match your API responses
-
-## Validation & Security
-
-### Frontend Validation
-- React Hook Form for form state
-- Zod schemas for validation
-- Real-time error feedback
-- Field-level validation rules
-
-### Backend Validation (Required)
-- Always validate on the server
-- Sanitize input to prevent XSS
-- Use parameterized queries for SQL
-- Implement rate limiting on sensitive endpoints
-- Never expose internal errors
-
-### Authentication
-- JWT token stored securely (currently in localStorage - should use httpOnly cookies)
-- Token validation on app load
-- Auto-logout on token expiration
-- Protected routes via `useAuth()` context
-
-## Styling & Customization
-
-### Theme System
-All colors are defined as CSS custom properties in `app/globals.css`:
-
-```css
---primary: oklch(0.455 0.166 258.9)  /* Medical Blue */
---secondary: oklch(0.547 0.136 142.456)  /* Calming Green */
---accent: oklch(0.7 0.15 205.4)  /* Cyan highlights */
-```
-
-### Tailwind Configuration
-Uses shadcn/ui new-york style with custom medical theme. All components use semantic tokens:
-- `bg-background`, `text-foreground`
-- `bg-card`, `text-card-foreground`
-- `bg-primary`, `text-primary-foreground`
-- etc.
-
-### Customization
-1. Update color tokens in `app/globals.css`
-2. Modify component styles in `components/ui/`
-3. Use Tailwind's responsive prefixes for layouts
+### Error Handling
+- Network errors show clear user messages
+- Missing Flask backend shows instructive error
+- Invalid answers are prevented with validation
+- All errors are logged for debugging
 
 ## Accessibility
 
-Features included:
-- ✅ Semantic HTML (button, form, labels)
-- ✅ ARIA labels where needed
-- ✅ Keyboard navigation support
-- ✅ Focus indicators on interactive elements
-- ✅ High contrast ratios (WCAG AA)
-- ✅ Form labels associated with inputs
-- ✅ Error messages linked to inputs
-- ✅ Skip links for main content
+- Semantic HTML structure
+- ARIA labels and roles
+- Keyboard navigation support
+- Color-coded severity indicators with text descriptions
+- Clear contrast ratios for readability
+- Responsive design for all screen sizes
 
-## Performance Optimization
+## Security & Privacy
 
-- Lazy-loaded route pages with React.lazy()
-- Optimized images and assets
-- Proper dependency arrays in useEffect/useMemo
-- No unnecessary re-renders
-- Code splitting by route
+- All assessments stored locally in browser (no server-side storage)
+- No personal information collected or transmitted
+- Results are encrypted in localStorage
+- Compliant with privacy best practices
+- Disclaimer shown to users about not replacing professional advice
 
-## Mental Health & Messaging Guidelines
+## Customization
 
-### Tone
-- Supportive and compassionate
-- Professional yet approachable
-- Non-judgmental language
-- Evidence-based terminology
+### Adding New Questions
+Edit `lib/data/testConfigs.ts` and update:
+1. Add new questions to the desired test configuration
+2. Map each question to backend feature names
+3. Define answer scales and values
 
-### Examples
-✅ **Good**: "Elevated depressive indicators detected"
-❌ **Bad**: "You are mentally ill"
+### Changing Styling
+- Tailwind CSS configuration in `tailwind.config.ts`
+- Color palette defined in `lib/types/index.ts` (SEVERITY_LABELS)
+- Component styles in respective component files
 
-✅ **Good**: "Support resources available"
-❌ **Bad**: "Seek help immediately" (alarming)
+### Modifying Flask Integration
+- Update API endpoint URL in `lib/api/mlClient.ts`
+- Adjust feature mapping logic in `mapAnswersToFeatures()`
+- Update response parsing in `submitAssessment()`
 
-✅ **Good**: "Consider speaking with a professional"
-❌ **Bad**: "You need therapy" (prescriptive)
+## Troubleshooting
 
-## Browser Support
+### Flask Connection Error
+- Ensure Flask backend is running on port 5000
+- Check CORS configuration in Flask app
+- Verify network connectivity
 
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-- Mobile browsers (iOS Safari, Chrome Mobile)
+### Questions Not Loading
+- Check `testConfigs.ts` for proper data structure
+- Verify test type parameter in URL matches config names
+- Check browser console for errors
 
-## Development
+### Results Not Saving
+- Check browser LocalStorage is enabled
+- Clear browser cache if storage issues persist
+- Check browser developer tools Storage tab
 
-### Code Style
-- Functional components only (no class components)
-- Hooks-based patterns
-- Descriptive variable names
-- Small, focused functions
-- No duplication (DRY principle)
+## Mental Health Resources
 
-### Common Tasks
+If you or someone you know needs support:
 
-**Add a new test type:**
-1. Add `TestType` to `lib/types.ts`
-2. Add questions to `lib/test-data.ts`
-3. Add scoring logic to `calculateTestScore()`
-4. Update `testInfo` object
-5. No page changes needed (uses dynamic routing)
-
-**Update validation schema:**
-1. Modify schema in `lib/schemas.ts`
-2. Update form component
-3. Ensure server validates the same rules
-
-**Modify theme colors:**
-1. Update CSS variables in `app/globals.css`
-2. Colors cascade to all components automatically
-
-## Known Limitations
-
-- Backend API not included (mock-friendly for now)
-- localStorage used for auth tokens (should use httpOnly cookies)
-- No test history persistence yet (would require backend)
-- Google OAuth setup required for that feature
-- Email verification disabled by default
-
-## Future Enhancements
-
-- [ ] Backend API integration
-- [ ] Test history and trend analysis
-- [ ] Export results as PDF
-- [ ] Integration with mental health resources
-- [ ] Multi-language support
-- [ ] Dark mode support
-- [ ] Social sharing of resources
-- [ ] Professional provider connections
-
-## Support & Resources
-
-### Mental Health Crisis Resources
-- **National Suicide Prevention Lifeline**: 988 (US)
+- **National Suicide Prevention Lifeline**: 988 (call or text)
 - **Crisis Text Line**: Text HOME to 741741
-- **International Association for Suicide Prevention**: https://www.iasp.info/resources/Crisis_Centres/
-
-### Technical Support
-- Review component documentation in the code
-- Check TypeScript interfaces for data structures
-- Validate against test-data.ts for assessment details
+- **NAMI Helpline**: 1-800-950-NAMI
+- **Mental Health America**: https://www.mentalhealth.gov/
 
 ## License
 
-This project is provided as-is for mental health assessment purposes.
+This project is for educational and research purposes.
 
-## Disclaimer
+## Support
 
-This application is designed for educational and screening purposes only. It is not a substitute for professional mental health evaluation or treatment. Users experiencing mental health concerns should consult with qualified healthcare providers. The assessments provided here are screening tools only and should not be used for diagnosis or treatment planning without professional consultation.
+For issues or questions, please check:
+1. Browser console for error messages
+2. Flask server logs for backend errors
+3. Ensure both frontend and backend are running properly
 
-## Contributing
+---
 
-Contributions are welcome! Please ensure:
-- Maintain accessibility standards
-- Follow the code style guidelines
-- Use compassionate, non-alarming language
-- Add proper TypeScript types
-- Include form validation
-- Test keyboard navigation
+**Note**: This application is for informational purposes only and should not be used as a substitute for professional medical advice. Always consult with a healthcare provider for diagnosis and treatment.

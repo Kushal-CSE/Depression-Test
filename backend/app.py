@@ -1,4 +1,4 @@
-from backend.services import auth_service
+from services import auth_service
 from dotenv import load_dotenv
 from services.ollama_service import generate_recommendation
 import db.repository as repository
@@ -21,7 +21,12 @@ from datetime import datetime, timedelta, UTC
 
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+CORS(
+    app,
+    # supports_credentials=True,
+    origins=["http://localhost:3000","https://vm-87n1mwc6zyapa44osl4ahwp5.vusercontent.net"]
+)
 
 # --- Load model + feature order once ---
 model = joblib.load("models/depression_svm_x3_model.pkl")
@@ -82,7 +87,7 @@ def predict():
 def signup():
 
     data = request.json
-
+    print(f"Signup request data: {data}")
     result = auth_service.signup_user(data)
 
     return jsonify(result["body"]), result["status"]

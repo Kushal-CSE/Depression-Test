@@ -1,135 +1,97 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useSearchParams } from "next/navigation";
-import { loginSchema, LoginInput } from "@/lib/schemas";
-import { useAuth } from "@/lib/auth-context";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/form-field";
-import Link from "next/link";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { Card } from '@/components/ui/card';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [globalError, setGlobalError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  async function onSubmit(data: LoginInput) {
-    setIsLoading(true)
-    setGlobalError(null)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
     try {
-      await login(data.email, data.password)
-      const from = searchParams.get('from') || '/dashboard'
-      router.push(from)
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to log in. Please try again.'
-      setGlobalError(message)
+      await login(email, password);
+      router.push('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
-      setIsLoading(false)
+      setLoading(false);
     }
-  }
-
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md border-2">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {globalError && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                <p className="text-sm text-destructive">{globalError}</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <Card className="border-0 shadow-lg p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-600">Sign in to your account to continue</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
 
-            <FormField label="Email Address" error={errors.email} required>
-              <Input
-                {...register("email")}
-                type="email"
-                placeholder="name@example.com"
-                disabled={isLoading}
-              />
-            </FormField>
-
-            <FormField label="Password" error={errors.password} required>
-              <Input
-                {...register("password")}
-                type="password"
-                placeholder="••••••••"
-                disabled={isLoading}
-              />
-            </FormField>
-
-            <div className="flex items-center justify-between text-sm">
-              <Link
-                href="/auth/forgot-password"
-                className="text-primary hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            <Button
+            <button
               type="submit"
-              className="w-full"
-              disabled={isLoading}
-              size="lg"
+              disabled={loading}
+              className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </Button>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <Button variant="outline" className="w-full" disabled={isLoading}>
-              Sign in with Google
-            </Button>
-
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">
-                Don't have an account?{" "}
-              </span>
-              <Link
-                href="/auth/signup"
-                className="text-primary font-semibold hover:underline"
-              >
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Don&apos;t have an account?{' '}
+              <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
                 Sign up
               </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+            </p>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
