@@ -1,15 +1,19 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
-import { AuthProvider } from '@/lib/flask-auth-context'
+import { Geist, Geist_Mono, Geist as V0_Font_Geist, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
+import { QuestionnaireProvider } from '@/lib/contexts/QuestionnaireContext'
+import { AuthProvider } from '@/lib/contexts/AuthContext'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+// Initialize fonts
+const _geist = V0_Font_Geist({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
+const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
+const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"] })
 
 export const metadata: Metadata = {
   title: 'Depression Assessment Platform',
-  description: 'Comprehensive mental health assessment tools with evidence-based screening tests',
+  description: 'Take validated mental health assessments (PHQ-9, BDI-2, CES-D, UCLA-8) to evaluate your depression level with AI-powered predictions',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -36,10 +40,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-background">
-      <body className="font-sans antialiased bg-background text-foreground">
+    <html lang="en" className="bg-gradient-to-br from-slate-50 to-blue-50">
+      <body className="font-sans antialiased min-h-screen">
         <AuthProvider>
-          {children}
+          <QuestionnaireProvider>
+            {children}
+          </QuestionnaireProvider>
         </AuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

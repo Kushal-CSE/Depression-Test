@@ -21,7 +21,12 @@ from datetime import datetime, timedelta, UTC
 
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+CORS(
+    app,
+    # supports_credentials=True,
+    origins=["http://localhost:3000","https://vm-87n1mwc6zyapa44osl4ahwp5.vusercontent.net"]
+)
 
 # --- Load model + feature order once ---
 model = joblib.load("models/depression_svm_x3_model.pkl")
