@@ -70,9 +70,23 @@ def create_app() -> Flask:
     # ERROR HANDLERS
     # =========================
 
-    app.register_error_handler(ValueError, handle_validation_error)
-    app.register_error_handler(PermissionError, handle_auth_error)
-    app.register_error_handler(Exception, handle_server_error)
+    app.register_error_handler(
+        ValueError,
+        handle_validation_error
+    )
+
+    app.register_error_handler(
+        PermissionError,
+        handle_auth_error
+    )
+
+    # Avoid swallowing useful debug tracebacks
+    if not app.debug:
+
+        app.register_error_handler(
+            Exception,
+            handle_server_error
+        )
 
     # =========================
     # ROUTES

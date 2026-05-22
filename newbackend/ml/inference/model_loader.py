@@ -11,6 +11,56 @@ from ml.models import (
 MODELS: dict[str, BaseEstimator] = {}
 FEATURE_ORDERS: dict[str, list[str]] = {}
 
+def _parse_model_filename(
+    filename: str,
+) -> tuple[str, str, str]:
+    """
+    Parse model filename into:
+    model_type, feature_set, test_type
+
+    Example:
+    logistic_regression_x1_bdi-ii
+    ->
+    (
+        "logistic_regression",
+        "x1",
+        "bdi-ii"
+    )
+    """
+
+    parts = filename.split("_")
+
+    if len(parts) < 3:
+        raise ValueError(
+            f"Invalid model filename: {filename}"
+        )
+
+    model_type = "_".join(parts[:-2])
+
+    feature_set = parts[-2]
+
+    test_type = parts[-1]
+
+    if not model_type:
+        raise ValueError(
+            f"Missing model type in: {filename}"
+        )
+
+    if not feature_set:
+        raise ValueError(
+            f"Missing feature set in: {filename}"
+        )
+
+    if not test_type:
+        raise ValueError(
+            f"Missing test type in: {filename}"
+        )
+
+    return (
+        model_type,
+        feature_set,
+        test_type,
+    )
 
 def _build_model_key(
     model_type: str,
@@ -176,3 +226,53 @@ def initialize_ml_models() -> None:
 
     MODELS = models
     FEATURE_ORDERS = feature_orders
+
+def get_model(
+    model_type: str,
+    feature_set: str,
+    test_type: str,
+):
+    """
+    Retrieve loaded model from registry.
+    """
+
+    model_key = _build_model_key(
+        model_type,
+        feature_set,
+        test_type
+    )
+
+    model = MODELS.get(model_key)
+
+    if model is None:
+        raise RuntimeError(
+            f"Model not found: {model_key}"
+        )
+
+    return model
+
+
+def get_feature_order(
+    feature_set: str,
+    test_type: str,
+) -> list[str]:
+    """
+    Retrieve feature order from registry.
+    """
+
+    feature_key = _build_feature_key(
+        feature_set,
+        test_type
+    )
+
+    feature_order = FEATURE_ORDERS.get(
+        feature_key
+    )
+
+    if feature_order is None:
+        raise RuntimeError(
+            f"Feature order not found: "
+            f"{feature_key}"
+        )
+
+    return feature_order

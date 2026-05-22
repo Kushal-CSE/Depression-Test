@@ -91,9 +91,7 @@ def create_access_token(
     return _build_token(
         payload=payload,
         token_type=TOKEN_TYPE_ACCESS,
-        expiration_delta=timedelta(
-            minutes=config["access_expiration"]
-        )
+        expiration_delta=config["access_expiration"]
     )
 
 

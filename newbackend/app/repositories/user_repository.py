@@ -69,7 +69,13 @@ def create_user(
             "Failed to create user document"
         ) from error
 
-    document["_id"] = result.inserted_id
+    document["id"] = str(
+        result.inserted_id
+    )
+
+    document.pop("_id", None)
+
+    document.pop("password", None)
 
     return document
 
@@ -92,6 +98,12 @@ def find_user_by_email(
         raise RuntimeError(
             "Failed to retrieve user by email"
         ) from error
+
+    if user:
+
+        user["id"] = str(
+            user["_id"]
+        )
 
     return user
 
@@ -120,6 +132,16 @@ def find_user_by_id(
         raise RuntimeError(
             "Failed to retrieve user by ID"
         ) from error
+
+    if user:
+
+        user["id"] = str(
+            user["_id"]
+        )
+
+        user.pop("_id", None)
+
+        user.pop("password", None)
 
     return user
 

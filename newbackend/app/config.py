@@ -194,12 +194,6 @@ class BaseConfig:
         default="ml/models",
     )
 
-    FEATURE_ORDER_PATH = _get_env(
-        "FEATURE_ORDER_PATH",
-        required=False,
-        default="ml/artifacts/feature_order.json",
-    )
-
     # --------------------------------------------------
     # Validation
     # --------------------------------------------------

@@ -21,10 +21,10 @@ def connect_database() -> MongoClient:
     if _client is not None:
         return _client
 
-    mongo_uri = current_app.config.get("MONGODB_URI")
+    mongo_uri = current_app.config.get("MONGO_URI")
 
     if not mongo_uri:
-        raise RuntimeError("MONGODB_URI is not configured")
+        raise RuntimeError("MONGO_URI is not configured")
 
     try:
         client = MongoClient(

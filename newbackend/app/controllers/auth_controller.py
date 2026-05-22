@@ -1,4 +1,7 @@
-from flask import request
+from flask import (
+    request,
+    current_app
+)
 
 from app.services.auth_service import (
     signup_user,
@@ -15,7 +18,9 @@ from app.services.google_auth_service import (
     process_google_login
 )
 
-from app.services.jwt_service import extract_token
+from app.services.jwt_service import (
+    extract_token
+)
 
 from app.utils.response import (
     success_response,
@@ -25,11 +30,13 @@ from app.utils.response import (
 
 def _get_request_data() -> dict:
     """
-    Retrieve sanitized request JSON payload safely.
+    Safely retrieve sanitized JSON payload.
     """
 
     if not request.is_json:
-        raise ValueError("Request content-type must be application/json")
+        raise ValueError(
+            "Request content-type must be application/json"
+        )
 
     sanitized_data = getattr(
         request,
@@ -40,7 +47,62 @@ def _get_request_data() -> dict:
     if sanitized_data is not None:
         return sanitized_data
 
-    return request.get_json(silent=True) or {}
+    return request.get_json(
+        silent=True
+    ) or {}
+
+
+def _build_service_response(
+    result: dict,
+    *,
+    success_status: int = 200
+):
+    """
+    Standardize controller responses from service results.
+    """
+
+    if not isinstance(result, dict):
+        return error_response(
+            message="Invalid service response",
+            status_code=500
+        )
+
+    if not result.get("success"):
+
+        status_code = result.get(
+            "status_code",
+            400
+        )
+
+        return error_response(
+            message=result.get(
+                "message",
+                "Request failed"
+            ),
+            errors=result.get("errors"),
+            status_code=status_code
+        )
+
+    response_data = dict(result)
+
+    response_data.pop(
+        "success",
+        None
+    )
+
+    response_data.pop(
+        "message",
+        None
+    )
+
+    return success_response(
+        message=result.get(
+            "message",
+            "Success"
+        ),
+        data=response_data,
+        status_code=success_status
+    )
 
 
 def signup_controller():
@@ -51,21 +113,28 @@ def signup_controller():
     try:
         request_data = _get_request_data()
 
-        result = signup_user(request_data)
+        result = signup_user(
+            request_data
+        )
 
-        return success_response(
-            message="Signup successful",
-            data=result,
-            status_code=201
+        return _build_service_response(
+            result,
+            success_status=201
         )
 
     except ValueError as error:
+
         return error_response(
             message=str(error),
             status_code=400
         )
 
     except Exception:
+
+        current_app.logger.exception(
+            "Signup controller failed"
+        )
+
         return error_response(
             message="Signup failed",
             status_code=500
@@ -80,26 +149,27 @@ def login_controller():
     try:
         request_data = _get_request_data()
 
-        result = login_user(request_data)
+        result = login_user(
+            request_data
+        )
 
-        return success_response(
-            message="Login successful",
-            data=result
+        return _build_service_response(
+            result
         )
 
     except ValueError as error:
+
         return error_response(
             message=str(error),
             status_code=400
         )
 
-    except PermissionError as error:
-        return error_response(
-            message=str(error),
-            status_code=401
+    except Exception:
+
+        current_app.logger.exception(
+            "Login controller failed"
         )
 
-    except Exception:
         return error_response(
             message="Login failed",
             status_code=500
@@ -112,7 +182,10 @@ def google_login_controller():
     """
 
     try:
-        auth_url = generate_google_auth_url()
+
+        auth_url = (
+            generate_google_auth_url()
+        )
 
         return success_response(
             message="Google auth URL generated",
@@ -122,8 +195,16 @@ def google_login_controller():
         )
 
     except Exception:
+
+        current_app.logger.exception(
+            "Google login URL generation failed"
+        )
+
         return error_response(
-            message="Failed to generate Google auth URL",
+            message=(
+                "Failed to generate "
+                "Google auth URL"
+            ),
             status_code=500
         )
 
@@ -134,6 +215,7 @@ def google_callback_controller():
     """
 
     try:
+
         request_data = _get_request_data()
 
         auth_code = (
@@ -146,56 +228,70 @@ def google_callback_controller():
                 "Authorization code is required"
             )
 
-        result = process_google_login(auth_code)
+        result = process_google_login(
+            auth_code
+        )
 
-        return success_response(
-            message="Google login successful",
-            data=result
+        return _build_service_response(
+            result
         )
 
     except ValueError as error:
+
         return error_response(
             message=str(error),
             status_code=400
         )
 
-    except PermissionError as error:
-        return error_response(
-            message=str(error),
-            status_code=401
+    except Exception:
+
+        current_app.logger.exception(
+            "Google callback failed"
         )
 
-    except Exception:
         return error_response(
-            message="Google authentication failed",
+            message=(
+                "Google authentication failed"
+            ),
             status_code=500
         )
 
 
 def forgot_password_controller():
     """
-    Handle forgot password requests.
+    Handle forgot-password requests.
     """
 
     try:
+
         request_data = _get_request_data()
 
-        result = forgot_password(request_data)
+        result = forgot_password(
+            request_data
+        )
 
-        return success_response(
-            message="Password reset initiated",
-            data=result
+        return _build_service_response(
+            result
         )
 
     except ValueError as error:
+
         return error_response(
             message=str(error),
             status_code=400
         )
 
     except Exception:
+
+        current_app.logger.exception(
+            "Forgot password controller failed"
+        )
+
         return error_response(
-            message="Failed to initiate password reset",
+            message=(
+                "Failed to initiate "
+                "password reset"
+            ),
             status_code=500
         )
 
@@ -206,10 +302,16 @@ def reset_password_controller():
     """
 
     try:
+
         request_data = _get_request_data()
 
-        token = request_data.get("token")
-        new_password = request_data.get("new_password")
+        token = request_data.get(
+            "token"
+        )
+
+        new_password = request_data.get(
+            "new_password"
+        )
 
         if not token:
             raise ValueError(
@@ -226,24 +328,23 @@ def reset_password_controller():
             new_password=new_password
         )
 
-        return success_response(
-            message="Password reset successful",
-            data=result
+        return _build_service_response(
+            result
         )
 
     except ValueError as error:
+
         return error_response(
             message=str(error),
             status_code=400
         )
 
-    except PermissionError as error:
-        return error_response(
-            message=str(error),
-            status_code=401
+    except Exception:
+
+        current_app.logger.exception(
+            "Reset password controller failed"
         )
 
-    except Exception:
         return error_response(
             message="Password reset failed",
             status_code=500
@@ -256,37 +357,43 @@ def verify_email_controller():
     """
 
     try:
+
         request_data = _get_request_data()
 
-        token = request_data.get("token")
+        token = request_data.get(
+            "token"
+        )
 
         if not token:
             raise ValueError(
                 "Verification token is required"
             )
 
-        result = verify_email(token)
+        result = verify_email(
+            token
+        )
 
-        return success_response(
-            message="Email verified successfully",
-            data=result
+        return _build_service_response(
+            result
         )
 
     except ValueError as error:
+
         return error_response(
             message=str(error),
             status_code=400
         )
 
-    except PermissionError as error:
-        return error_response(
-            message=str(error),
-            status_code=401
+    except Exception:
+
+        current_app.logger.exception(
+            "Email verification failed"
         )
 
-    except Exception:
         return error_response(
-            message="Email verification failed",
+            message=(
+                "Email verification failed"
+            ),
             status_code=500
         )
 
@@ -297,29 +404,41 @@ def get_current_user_controller():
     """
 
     try:
-        token = extract_token(request)
+
+        token = extract_token(
+            request
+        )
 
         if not token:
             raise PermissionError(
                 "Authentication token is required"
             )
 
-        result = get_current_user(token)
+        result = get_current_user(
+            token
+        )
 
-        return success_response(
-            message="Current user fetched successfully",
-            data=result
+        return _build_service_response(
+            result
         )
 
     except PermissionError as error:
+
         return error_response(
             message=str(error),
             status_code=401
         )
 
     except Exception:
+
+        current_app.logger.exception(
+            "Current user fetch failed"
+        )
+
         return error_response(
-            message="Failed to fetch current user",
+            message=(
+                "Failed to fetch current user"
+            ),
             status_code=500
         )
 
@@ -330,14 +449,19 @@ def logout_controller():
     """
 
     try:
+
         result = logout_user()
 
-        return success_response(
-            message="Logout successful",
-            data=result
+        return _build_service_response(
+            result
         )
 
     except Exception:
+
+        current_app.logger.exception(
+            "Logout controller failed"
+        )
+
         return error_response(
             message="Logout failed",
             status_code=500
