@@ -1,0 +1,571 @@
+├── .git
+├── backend
+│   ├── data
+│   │   ├── log.txt
+│   │   └── svm_feature_order.pkl
+│   ├── db
+│   │   ├── __pycache__
+│   │   ├── database.py
+│   │   ├── init_db.py
+│   │   └── repository.py
+│   ├── models
+│   │   └── depression_svm_x3_model.pkl
+│   ├── services
+│   │   ├── __pycache__
+│   │   ├── auth_service.py
+│   │   ├── gemini_service.py
+│   │   ├── model_service.py
+│   │   └── ollama_service.py
+│   ├── .env
+│   ├── app.py
+│   ├── predictions.db
+│   ├── request.py
+│   ├── requirements.txt
+│   └── WeightAssigned_Model3_CES.ipynb
+├── frontend
+│   ├── mobileApp
+│   │   ├── .expo
+│   │   ├── .vscode
+│   │   │   ├── extensions.json
+│   │   │   └── settings.json
+│   │   ├── app
+│   │   │   ├── (tabs)
+│   │   │   │   ├── explore.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── _layout.tsx
+│   │   │   ├── modal.tsx
+│   │   │   └── _layout.tsx
+│   │   ├── assets
+│   │   │   └── images
+│   │   │       ├── android-icon-background.png
+│   │   │       ├── android-icon-foreground.png
+│   │   │       ├── android-icon-monochrome.png
+│   │   │       ├── favicon.png
+│   │   │       ├── icon.png
+│   │   │       ├── partial-react-logo.png
+│   │   │       ├── react-logo.png
+│   │   │       ├── react-logo@2x.png
+│   │   │       ├── react-logo@3x.png
+│   │   │       └── splash-icon.png
+│   │   ├── components
+│   │   │   ├── ui
+│   │   │   │   ├── collapsible.tsx
+│   │   │   │   ├── icon-symbol.ios.tsx
+│   │   │   │   └── icon-symbol.tsx
+│   │   │   ├── external-link.tsx
+│   │   │   ├── haptic-tab.tsx
+│   │   │   ├── hello-wave.tsx
+│   │   │   ├── parallax-scroll-view.tsx
+│   │   │   ├── themed-text.tsx
+│   │   │   └── themed-view.tsx
+│   │   ├── constants
+│   │   │   └── theme.ts
+│   │   ├── hooks
+│   │   │   ├── use-color-scheme.ts
+│   │   │   ├── use-color-scheme.web.ts
+│   │   │   └── use-theme-color.ts
+│   │   ├── node_modules
+│   │   ├── scripts
+│   │   │   └── reset-project.js
+│   │   ├── .gitignore
+│   │   ├── app.json
+│   │   ├── eslint.config.js
+│   │   ├── expo-env.d.ts
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── README.md
+│   │   └── tsconfig.json
+│   ├── newWeb
+│   │   ├── app
+│   │   │   ├── auth
+│   │   │   │   ├── forgot-password
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── login
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── signup
+│   │   │   │       └── page.tsx
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile
+│   │   │   │   └── page.tsx
+│   │   │   ├── tests
+│   │   │   │   └── [testType]
+│   │   │   │       └── page.tsx
+│   │   │   ├── globals.css
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx
+│   │   ├── components
+│   │   │   ├── ui
+│   │   │   │   ├── accordion.tsx
+│   │   │   │   ├── alert-dialog.tsx
+│   │   │   │   ├── alert.tsx
+│   │   │   │   ├── aspect-ratio.tsx
+│   │   │   │   ├── avatar.tsx
+│   │   │   │   ├── badge.tsx
+│   │   │   │   ├── breadcrumb.tsx
+│   │   │   │   ├── button-group.tsx
+│   │   │   │   ├── button.tsx
+│   │   │   │   ├── calendar.tsx
+│   │   │   │   ├── card.tsx
+│   │   │   │   ├── carousel.tsx
+│   │   │   │   ├── chart.tsx
+│   │   │   │   ├── checkbox.tsx
+│   │   │   │   ├── collapsible.tsx
+│   │   │   │   ├── command.tsx
+│   │   │   │   ├── context-menu.tsx
+│   │   │   │   ├── dialog.tsx
+│   │   │   │   ├── drawer.tsx
+│   │   │   │   ├── dropdown-menu.tsx
+│   │   │   │   ├── empty.tsx
+│   │   │   │   ├── field.tsx
+│   │   │   │   ├── form.tsx
+│   │   │   │   ├── hover-card.tsx
+│   │   │   │   ├── input-group.tsx
+│   │   │   │   ├── input-otp.tsx
+│   │   │   │   ├── input.tsx
+│   │   │   │   ├── item.tsx
+│   │   │   │   ├── kbd.tsx
+│   │   │   │   ├── label.tsx
+│   │   │   │   ├── menubar.tsx
+│   │   │   │   ├── navigation-menu.tsx
+│   │   │   │   ├── pagination.tsx
+│   │   │   │   ├── popover.tsx
+│   │   │   │   ├── progress.tsx
+│   │   │   │   ├── radio-group.tsx
+│   │   │   │   ├── resizable.tsx
+│   │   │   │   ├── scroll-area.tsx
+│   │   │   │   ├── select.tsx
+│   │   │   │   ├── separator.tsx
+│   │   │   │   ├── sheet.tsx
+│   │   │   │   ├── sidebar.tsx
+│   │   │   │   ├── skeleton.tsx
+│   │   │   │   ├── slider.tsx
+│   │   │   │   ├── sonner.tsx
+│   │   │   │   ├── spinner.tsx
+│   │   │   │   ├── switch.tsx
+│   │   │   │   ├── table.tsx
+│   │   │   │   ├── tabs.tsx
+│   │   │   │   ├── textarea.tsx
+│   │   │   │   ├── toast.tsx
+│   │   │   │   ├── toaster.tsx
+│   │   │   │   ├── toggle-group.tsx
+│   │   │   │   ├── toggle.tsx
+│   │   │   │   ├── tooltip.tsx
+│   │   │   │   ├── use-mobile.tsx
+│   │   │   │   └── use-toast.ts
+│   │   │   ├── form-field.tsx
+│   │   │   ├── result-card.tsx
+│   │   │   ├── test-card.tsx
+│   │   │   └── theme-provider.tsx
+│   │   ├── hooks
+│   │   │   ├── use-mobile.ts
+│   │   │   └── use-toast.ts
+│   │   ├── lib
+│   │   │   ├── api-client.ts
+│   │   │   ├── auth-context.tsx
+│   │   │   ├── schemas.ts
+│   │   │   ├── test-data.ts
+│   │   │   ├── types.ts
+│   │   │   └── utils.ts
+│   │   ├── public
+│   │   │   ├── apple-icon.png
+│   │   │   ├── icon-dark-32x32.png
+│   │   │   ├── icon-light-32x32.png
+│   │   │   ├── icon.svg
+│   │   │   ├── placeholder-logo.png
+│   │   │   ├── placeholder-logo.svg
+│   │   │   ├── placeholder-user.jpg
+│   │   │   ├── placeholder.jpg
+│   │   │   └── placeholder.svg
+│   │   ├── styles
+│   │   │   └── globals.css
+│   │   ├── .env.local.example
+│   │   ├── .gitignore
+│   │   ├── BUILD_SUMMARY.md
+│   │   ├── components.json
+│   │   ├── DEVELOPMENT.md
+│   │   ├── GETTING_STARTED.md
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.mjs
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── pnpm-lock.yaml
+│   │   ├── postcss.config.mjs
+│   │   ├── QUICK_REFERENCE.md
+│   │   ├── README.md
+│   │   └── tsconfig.json
+│   └── Web
+│       ├── .next
+│       ├── app
+│       │   ├── api
+│       │   │   └── predict
+│       │   │       └── route.ts
+│       │   ├── globals.css
+│       │   ├── layout.tsx
+│       │   └── page.tsx
+│       ├── components
+│       │   ├── assessment
+│       │   │   ├── assessment-form.tsx
+│       │   │   ├── form-section.tsx
+│       │   │   ├── header.tsx
+│       │   │   ├── progress-indicator.tsx
+│       │   │   ├── result-display.tsx
+│       │   │   └── submission-popup.tsx
+│       │   ├── ui
+│       │   │   ├── accordion.tsx
+│       │   │   ├── alert-dialog.tsx
+│       │   │   ├── alert.tsx
+│       │   │   ├── aspect-ratio.tsx
+│       │   │   ├── avatar.tsx
+│       │   │   ├── badge.tsx
+│       │   │   ├── breadcrumb.tsx
+│       │   │   ├── button-group.tsx
+│       │   │   ├── button.tsx
+│       │   │   ├── calendar.tsx
+│       │   │   ├── card.tsx
+│       │   │   ├── carousel.tsx
+│       │   │   ├── chart.tsx
+│       │   │   ├── checkbox.tsx
+│       │   │   ├── collapsible.tsx
+│       │   │   ├── command.tsx
+│       │   │   ├── context-menu.tsx
+│       │   │   ├── dialog.tsx
+│       │   │   ├── drawer.tsx
+│       │   │   ├── dropdown-menu.tsx
+│       │   │   ├── empty.tsx
+│       │   │   ├── field.tsx
+│       │   │   ├── form.tsx
+│       │   │   ├── hover-card.tsx
+│       │   │   ├── input-group.tsx
+│       │   │   ├── input-otp.tsx
+│       │   │   ├── input.tsx
+│       │   │   ├── item.tsx
+│       │   │   ├── kbd.tsx
+│       │   │   ├── label.tsx
+│       │   │   ├── menubar.tsx
+│       │   │   ├── navigation-menu.tsx
+│       │   │   ├── pagination.tsx
+│       │   │   ├── popover.tsx
+│       │   │   ├── progress.tsx
+│       │   │   ├── radio-group.tsx
+│       │   │   ├── resizable.tsx
+│       │   │   ├── scroll-area.tsx
+│       │   │   ├── select.tsx
+│       │   │   ├── separator.tsx
+│       │   │   ├── sheet.tsx
+│       │   │   ├── sidebar.tsx
+│       │   │   ├── skeleton.tsx
+│       │   │   ├── slider.tsx
+│       │   │   ├── sonner.tsx
+│       │   │   ├── spinner.tsx
+│       │   │   ├── switch.tsx
+│       │   │   ├── table.tsx
+│       │   │   ├── tabs.tsx
+│       │   │   ├── textarea.tsx
+│       │   │   ├── toast.tsx
+│       │   │   ├── toaster.tsx
+│       │   │   ├── toggle-group.tsx
+│       │   │   ├── toggle.tsx
+│       │   │   ├── tooltip.tsx
+│       │   │   ├── use-mobile.tsx
+│       │   │   └── use-toast.ts
+│       │   └── theme-provider.tsx
+│       ├── hooks
+│       │   ├── use-mobile.ts
+│       │   └── use-toast.ts
+│       ├── lib
+│       │   ├── assessment-data.ts
+│       │   └── utils.ts
+│       ├── node_modules
+│       ├── public
+│       │   ├── apple-icon.png
+│       │   ├── icon-dark-32x32.png
+│       │   ├── icon-light-32x32.png
+│       │   ├── icon.svg
+│       │   ├── placeholder-logo.png
+│       │   ├── placeholder-logo.svg
+│       │   ├── placeholder-user.jpg
+│       │   ├── placeholder.jpg
+│       │   └── placeholder.svg
+│       ├── styles
+│       │   └── globals.css
+│       ├── .gitignore
+│       ├── components.json
+│       ├── next-env.d.ts
+│       ├── next.config.mjs
+│       ├── package-lock.json
+│       ├── package.json
+│       ├── pnpm-lock.yaml
+│       ├── postcss.config.mjs
+│       └── tsconfig.json
+├── newbackend
+│   ├── app
+│   │   ├── controllers
+│   │   │   ├── __pycache__
+│   │   │   ├── auth_controller.py
+│   │   │   ├── history_controller.py
+│   │   │   └── prediction_controller.py
+│   │   ├── database
+│   │   │   ├── __pycache__
+│   │   │   ├── collections.py
+│   │   │   └── database.py
+│   │   ├── decorators
+│   │   │   ├── __pycache__
+│   │   │   ├── jwt_decorator.py
+│   │   │   └── role_decorator.py
+│   │   ├── environments
+│   │   │   ├── __pycache__
+│   │   │   ├── dev.py
+│   │   │   └── prod.py
+│   │   ├── external_apis
+│   │   │   ├── __pycache__
+│   │   │   ├── email_client.py
+│   │   │   └── google_oauth.py
+│   │   ├── middleware
+│   │   │   ├── __pycache__
+│   │   │   ├── auth_middleware.py
+│   │   │   ├── error_middleware.py
+│   │   │   ├── logging_middleware.py
+│   │   │   ├── rate_limit_middleware.py
+│   │   │   └── security_middleware.py
+│   │   ├── repositories
+│   │   │   ├── __pycache__
+│   │   │   ├── prediction_repository.py
+│   │   │   └── user_repository.py
+│   │   ├── routes
+│   │   │   ├── __pycache__
+│   │   │   ├── auth_routes.py
+│   │   │   ├── history_routes.py
+│   │   │   └── prediction_routes.py
+│   │   ├── schemas
+│   │   │   ├── __pycache__
+│   │   │   ├── auth_schema.py
+│   │   │   ├── history_schema.py
+│   │   │   └── prediction_schema.py
+│   │   ├── services
+│   │   │   ├── __pycache__
+│   │   │   ├── auth_service.py
+│   │   │   ├── email_service.py
+│   │   │   ├── google_auth_service.py
+│   │   │   ├── jwt_service.py
+│   │   │   ├── logging_service.py
+│   │   │   ├── prediction_service.py
+│   │   │   └── rate_limit_service.py
+│   │   ├── utils
+│   │   │   ├── __pycache__
+│   │   │   ├── constants.py
+│   │   │   ├── helpers.py
+│   │   │   ├── logger.py
+│   │   │   ├── response.py
+│   │   │   └── security.py
+│   │   ├── validators
+│   │   │   ├── __pycache__
+│   │   │   ├── auth_validator.py
+│   │   │   ├── normalization_validator.py
+│   │   │   ├── prediction_validator.py
+│   │   │   ├── range_validator.py
+│   │   │   └── type_validator.py
+│   │   ├── __pycache__
+│   │   ├── config.py
+│   │   └── __init__.py
+│   ├── data
+│   │   ├── datasets
+│   │   ├── logs
+│   │   │   ├── auth.log
+│   │   │   ├── errors.log
+│   │   │   └── requests.log
+│   │   └── predictions
+│   ├── ml
+│   │   ├── explainability
+│   │   │   ├── __pycache__
+│   │   │   ├── consensus_explainer.py
+│   │   │   ├── feature_importance.py
+│   │   │   └── severity_explainer.py
+│   │   ├── inference
+│   │   │   ├── __pycache__
+│   │   │   ├── confidence_analyzer.py
+│   │   │   ├── ensemble_predictor.py
+│   │   │   ├── logistic_predictor.py
+│   │   │   ├── model_loader.py
+│   │   │   ├── randomforest_predictor.py
+│   │   │   └── svm_predictor.py
+│   │   ├── models
+│   │   │   ├── feature_orders
+│   │   │   │   ├── __pycache__
+│   │   │   │   ├── x1_bdi-ii.pkl
+│   │   │   │   ├── x1_ces-d.pkl
+│   │   │   │   ├── x1_phq9.pkl
+│   │   │   │   ├── x2_bdi-ii.pkl
+│   │   │   │   ├── x2_ces-d.pkl
+│   │   │   │   ├── x2_phq9.pkl
+│   │   │   │   ├── x3_bdi-ii.pkl
+│   │   │   │   ├── x3_ces-d.pkl
+│   │   │   │   ├── x3_phq9.pkl
+│   │   │   │   ├── x4_bdi-ii.pkl
+│   │   │   │   ├── x4_ces-d.pkl
+│   │   │   │   ├── x4_phq9.pkl
+│   │   │   │   └── __init__.py
+│   │   │   ├── trained_models
+│   │   │   │   ├── __pycache__
+│   │   │   │   ├── logistic_regression_x1_bdi-ii.pkl
+│   │   │   │   ├── logistic_regression_x1_ces-d.pkl
+│   │   │   │   ├── logistic_regression_x1_phq9.pkl
+│   │   │   │   ├── logistic_regression_x2_bdi-ii.pkl
+│   │   │   │   ├── logistic_regression_x2_ces-d.pkl
+│   │   │   │   ├── logistic_regression_x2_phq9.pkl
+│   │   │   │   ├── logistic_regression_x3_bdi-ii.pkl
+│   │   │   │   ├── logistic_regression_x3_ces-d.pkl
+│   │   │   │   ├── logistic_regression_x3_phq9.pkl
+│   │   │   │   ├── logistic_regression_x4_bdi-ii.pkl
+│   │   │   │   ├── logistic_regression_x4_ces-d.pkl
+│   │   │   │   ├── logistic_regression_x4_phq9.pkl
+│   │   │   │   ├── random_forest_x1_bdi-ii.pkl
+│   │   │   │   ├── random_forest_x1_ces-d.pkl
+│   │   │   │   ├── random_forest_x1_phq9.pkl
+│   │   │   │   ├── random_forest_x2_bdi-ii.pkl
+│   │   │   │   ├── random_forest_x2_ces-d.pkl
+│   │   │   │   ├── random_forest_x2_phq9.pkl
+│   │   │   │   ├── random_forest_x3_bdi-ii.pkl
+│   │   │   │   ├── random_forest_x3_ces-d.pkl
+│   │   │   │   ├── random_forest_x3_phq9.pkl
+│   │   │   │   ├── random_forest_x4_bdi-ii.pkl
+│   │   │   │   ├── random_forest_x4_ces-d.pkl
+│   │   │   │   ├── random_forest_x4_phq9.pkl
+│   │   │   │   ├── svm_x1_bdi-ii.pkl
+│   │   │   │   ├── svm_x1_ces-d.pkl
+│   │   │   │   ├── svm_x1_phq9.pkl
+│   │   │   │   ├── svm_x2_bdi-ii.pkl
+│   │   │   │   ├── svm_x2_ces-d.pkl
+│   │   │   │   ├── svm_x2_phq9.pkl
+│   │   │   │   ├── svm_x3_bdi-ii.pkl
+│   │   │   │   ├── svm_x3_ces-d.pkl
+│   │   │   │   ├── svm_x3_phq9.pkl
+│   │   │   │   ├── svm_x4_bdi-ii.pkl
+│   │   │   │   ├── svm_x4_ces-d.pkl
+│   │   │   │   ├── svm_x4_phq9.pkl
+│   │   │   │   └── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   ├── svm_x3_cesd.pkl
+│   │   │   └── __init__.py
+│   │   ├── preprocessing
+│   │   │   ├── __pycache__
+│   │   │   ├── feature_mapper.py
+│   │   │   ├── feature_selector.py
+│   │   │   └── normalizer.py
+│   │   └── training
+│   │       ├── docsAndNotes
+│   │       ├── experiments
+│   │       │   ├── comparison_reports
+│   │       │   ├── confusion_matrices
+│   │       │   └── evaluation_results
+│   │       ├── exports
+│   │       │   ├── feature_weights
+│   │       │   ├── preprocessing_objects
+│   │       │   └── trained_models
+│   │       └── notebooks
+│   │           ├── 1_dataProcessing.ipynb
+│   │           ├── 2_PHQ-9_Model.ipynb
+│   │           ├── 3_BDI-II_Model.ipynb
+│   │           └── 4_CES-D_Model.ipynb
+│   ├── tests
+│   │   ├── .pytest_cache
+│   │   ├── auth
+│   │   │   ├── test_email_verification.py
+│   │   │   ├── test_google_auth.py
+│   │   │   ├── test_jwt.py
+│   │   │   ├── test_login.py
+│   │   │   ├── test_logout.py
+│   │   │   ├── test_me.py
+│   │   │   ├── test_password_reset.py
+│   │   │   └── test_signup.py
+│   │   ├── fixtures
+│   │   │   ├── auth_payloads.py
+│   │   │   ├── feature_rules.py
+│   │   │   ├── model_fixtures.py
+│   │   │   ├── prediction_payloads.py
+│   │   │   ├── token_fixtures.py
+│   │   │   └── user_fixtures.py
+│   │   ├── integration
+│   │   │   ├── test_auth_flow.py
+│   │   │   ├── test_database_integration.py
+│   │   │   ├── test_full_user_journey.py
+│   │   │   └── test_prediction_flow.py
+│   │   ├── middleware
+│   │   │   ├── __pycache__
+│   │   │   ├── test_auth_middleware.py
+│   │   │   ├── test_error_middleware.py
+│   │   │   ├── test_logging_middleware.py
+│   │   │   ├── test_rate_limit_middleware.py
+│   │   │   └── test_security_middleware.py
+│   │   ├── ml
+│   │   │   ├── test_confidence_analyzer.py
+│   │   │   ├── test_ensemble_predictor.py
+│   │   │   ├── test_feature_mapper.py
+│   │   │   ├── test_feature_selector.py
+│   │   │   ├── test_logistic_predictor.py
+│   │   │   ├── test_model_loader.py
+│   │   │   ├── test_normalizer.py
+│   │   │   ├── test_randomforest_predictor.py
+│   │   │   └── test_svm_predictor.py
+│   │   ├── mocks
+│   │   │   ├── mock_models.py
+│   │   │   ├── mock_predictions.py
+│   │   │   ├── mock_tokens.py
+│   │   │   └── mock_users.py
+│   │   ├── prediction
+│   │   │   ├── test_confidence_analysis.py
+│   │   │   ├── test_ensemble_predictor.py
+│   │   │   ├── test_model_selection.py
+│   │   │   ├── test_prediction_history.py
+│   │   │   ├── test_prediction_response.py
+│   │   │   ├── test_prediction_validation.py
+│   │   │   └── test_predict_endpoint.py
+│   │   ├── repositories
+│   │   │   ├── __pycache__
+│   │   │   ├── test_prediction_repository.py
+│   │   │   └── test_user_repository.py
+│   │   ├── security
+│   │   │   ├── test_input_sanitization.py
+│   │   │   ├── test_password_hashing.py
+│   │   │   ├── test_protected_routes.py
+│   │   │   └── test_token_security.py
+│   │   ├── services
+│   │   │   ├── __pycache__
+│   │   │   ├── test_auth_service.py
+│   │   │   ├── test_email_service.py
+│   │   │   ├── test_google_auth_service.py
+│   │   │   ├── test_jwt_service.py
+│   │   │   ├── test_logging_service.py
+│   │   │   ├── test_prediction_service.py
+│   │   │   └── test_rate_limit_service.py
+│   │   ├── validators
+│   │   │   ├── test_auth_validator.py
+│   │   │   ├── test_normalization_validator.py
+│   │   │   ├── test_prediction_validator.py
+│   │   │   ├── test_range_validator.py
+│   │   │   └── type_validator.py
+│   │   ├── __pycache__
+│   │   ├── conftest.py
+│   │   ├── pytest.ini
+│   │   └── test_security.py
+│   ├── __pycache__
+│   ├── .env
+│   ├── .env.example
+│   ├── ARCHITECTURE_REFERENCE.md
+│   ├── ARCHITECTURE_REFERENCE_v1.md
+│   ├── Changes made_v1.md
+│   ├── FILE_RESPONSIBILITIES.md
+│   ├── FUNCTION_REFERENCE.md
+│   ├── PROJECT_STRUCTURE.md
+│   ├── README.md
+│   ├── refactor.md
+│   ├── Refactor_v1.md
+│   ├── requirements.txt
+│   └── run.py
+├── .gitignore
+├── convert_to_tree.py
+├── convert_to_tree_markdown.py
+├── generate_structure.ps1
+├── structure_clean.txt
+├── tree_output.md
+└── tree_output.txt
