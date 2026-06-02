@@ -46,14 +46,6 @@ const DUMMY_ASSESSMENTS: AssessmentResult[] = [
     date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: '4',
-    testType: 'ucla8',
-    prediction: 0,
-    confidenceScore: 0.88,
-    mentalHealthTips: ['Continue current wellness routine', 'Support others when possible', 'Stay socially connected'],
-    date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
     id: '5',
     testType: 'phq9',
     prediction: 2,

@@ -117,3 +117,27 @@
 [2026-05-22 21:58:58,201] INFO in request_logger: OPTIONS | /predict | IP=127.0.0.1 | STATUS=401
 [2026-05-22 22:05:04,835] INFO in request_logger: POST | /predict | IP=127.0.0.1 | STATUS=0
 [2026-05-22 22:05:04,854] INFO in request_logger: POST | /predict | IP=127.0.0.1 | STATUS=401
+<<<<<<< HEAD
+[2026-05-25 15:45:06,777] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 15:45:06,789] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 15:45:06,863] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 15:48:04,779] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 15:48:05,118] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 15:51:09,065] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 15:51:09,070] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 15:51:09,431] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 15:51:10,734] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 16:05:55,828] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 16:05:55,836] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 16:05:56,164] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 16:06:01,375] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=500
+[2026-05-25 17:27:22,214] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 17:27:22,216] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 17:27:22,648] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 17:27:53,705] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 17:27:54,055] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 17:28:18,775] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 17:28:18,776] INFO in request_logger: OPTIONS | /auth/login | IP=127.0.0.1 | STATUS=200
+[2026-05-25 17:28:18,781] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 17:28:25,389] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=0
+[2026-05-25 17:28:25,687] INFO in request_logger: POST | /auth/login | IP=127.0.0.1 | STATUS=200

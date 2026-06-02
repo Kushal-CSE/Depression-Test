@@ -154,13 +154,7 @@
 // }
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-
+import React, { createContext, useContext, useEffect, useState } from "react";
 export interface User {
   id: string;
   name: string;
@@ -179,11 +173,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -210,11 +201,24 @@ export function AuthProvider({
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/login", {
+      // const response = await fetch("http://127.0.0.1:5000/auth/login", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     email,
+      //     password,
+      //   }),
+      // });
+      const response = await fetch("http://localhost:5000/auth/login", {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
+
         body: JSON.stringify({
           email,
           password,
@@ -224,9 +228,8 @@ export function AuthProvider({
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          responseData.message || "Login failed"
-        );
+        throw new Error(responseData.message || "Login failed");
+
       }
 
       console.log("[v0] FULL LOGIN RESPONSE:", responseData);
@@ -254,43 +257,34 @@ export function AuthProvider({
       setUser(userData);
 
       localStorage.setItem("auth_token", newToken);
-      localStorage.setItem(
-        "auth_user",
-        JSON.stringify(userData)
-      );
+      localStorage.setItem("auth_user", JSON.stringify(userData));
+
     } catch (error) {
       console.error("[v0] Login error:", error);
       throw error;
     }
   };
 
-  const signup = async (
-    name: string,
-    email: string,
-    password: string
-  ) => {
+  const signup = async (name: string, email: string, password: string) => {
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/auth/signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            password,
-          }),
-        }
-      );
+      const response = await fetch("http://127.0.0.1:5000/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
+
 
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          responseData.message || "Signup failed"
-        );
+        throw new Error(responseData.message || "Signup failed");
+
       }
 
       console.log("[v0] FULL SIGNUP RESPONSE:", responseData);
@@ -318,10 +312,8 @@ export function AuthProvider({
       setUser(userData);
 
       localStorage.setItem("auth_token", newToken);
-      localStorage.setItem(
-        "auth_user",
-        JSON.stringify(userData)
-      );
+      localStorage.setItem("auth_user", JSON.stringify(userData));
+
     } catch (error) {
       console.error("[v0] Signup error:", error);
       throw error;
@@ -357,10 +349,9 @@ export function useAuth() {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error(
-      "useAuth must be used within an AuthProvider"
-    );
+    throw new Error("useAuth must be used within an AuthProvider");
   }
 
   return context;
 }
+

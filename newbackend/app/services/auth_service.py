@@ -61,7 +61,11 @@ def signup_user(data: dict) -> dict:
         "name": data["name"],
         "email": data["email"],
         "password": hashed_password,
+<<<<<<< HEAD
+        "is_verified": False
+=======
         "is_verified": True  # Change here
+>>>>>>> 2c0096354ce35b841f35c6add81b449cd074e09a
     })
 
     if not new_user:
