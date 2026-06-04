@@ -26,6 +26,9 @@ def _get_predictions_collection() -> Collection:
 
 
 def save_prediction(
+        
+    
+
     *,
     user_id: str,
     input_data: Dict[str, Any],
@@ -43,6 +46,9 @@ def save_prediction(
         "prediction_results": prediction_results,
         "recommendation": recommendation
     }
+
+    # print("SAVING PREDICTION:")
+    # print(document)
 
     try:
 
@@ -70,19 +76,32 @@ def get_prediction_history(
     Get prediction history for a user.
     """
 
-    try:
-        return list(
-            _get_predictions_collection()
-            .find({"user_id": user_id})
-            .sort("created_at", -1)
-            .limit(limit)
-        )
+    # print("LOOKING FOR USER:", user_id)
 
-    except PyMongoError as error:
+    results = list(
+        _get_predictions_collection()
+        .find({"user_id": user_id})
+        .sort("created_at", -1)
+        .limit(limit)
+    )
 
-        raise RuntimeError(
-            "Failed to retrieve prediction history"
-        ) from error
+    # print("FOUND:", len(results))
+
+    return results
+
+    # try:
+    #     return list(
+    #         _get_predictions_collection()
+    #         .find({"user_id": user_id})
+    #         .sort("created_at", -1)
+    #         .limit(limit)
+    #     )
+
+    # except PyMongoError as error:
+
+    #     raise RuntimeError(
+    #         "Failed to retrieve prediction history"
+    #     ) from error
 
 def get_prediction_by_id(
     prediction_id: str

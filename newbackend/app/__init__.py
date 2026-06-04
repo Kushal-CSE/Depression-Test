@@ -6,6 +6,9 @@ from app.config import load_config
 from app.routes.auth_routes import register_auth_routes
 from app.routes.prediction_routes import register_prediction_routes
 from app.routes.history_routes import register_history_routes
+from app.routes.dashboard_routes import (
+    register_dashboard_routes
+)
 
 # Middleware
 from app.middleware.logging_middleware import (
@@ -95,6 +98,7 @@ def create_app() -> Flask:
     register_auth_routes(app)
     register_prediction_routes(app)
     register_history_routes(app)
+    register_dashboard_routes(app)
 
     # Graceful DB cleanup
     @app.teardown_appcontext

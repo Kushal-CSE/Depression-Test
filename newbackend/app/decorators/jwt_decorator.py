@@ -41,7 +41,10 @@ def jwt_required():
 
             payload = decode_token(token)
 
-            g.current_user = payload
+            g.current_user = {
+                "id": payload.get("user_id"),
+                "email": payload.get("email")
+            }
 
             return function(*args, **kwargs)
 

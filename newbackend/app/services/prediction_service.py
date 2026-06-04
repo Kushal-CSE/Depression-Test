@@ -136,7 +136,13 @@ def generate_prediction(
     #
     # Future persistence hook
     #
+
+    # print("user_id =", user_id)
+    # print("persist_history =", persist_history)
+
     if persist_history and user_id:
+
+        # print("ABOUT TO SAVE PREDICTION")
 
         save_prediction(
             user_id=user_id,
