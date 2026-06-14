@@ -20,6 +20,9 @@ from app.repositories.prediction_repository import (
     save_prediction
 )
 
+from app.services.recommendation_service import (
+    generate_recommendation
+)
 
 def generate_prediction(
     input_data: dict,
@@ -131,7 +134,12 @@ def generate_prediction(
         }
     }
 
-    recommendation = "Based on the predictions, we recommend consulting a mental health professional for a comprehensive evaluation and personalized treatment plan."
+    recommendation = generate_recommendation(
+        prediction_results=prediction_results,
+        user_data=input_data
+    )
+
+    # recommendation = "Based on the predictions, we recommend consulting a mental health professional for a comprehensive evaluation and personalized treatment plan."
 
     #
     # Future persistence hook
@@ -152,3 +160,66 @@ def generate_prediction(
         )
 
     return prediction_results
+
+
+def save_manual_test(
+    request_data: dict,
+    user_id: str
+) -> dict:
+    """
+    Save manually completed assessment results.
+    """
+
+    if not user_id:
+
+        return {
+            "success": False,
+            "message": "User not authenticated",
+            "status_code": 401
+        }
+
+    input_data = request_data.get(
+        "input_data",
+        {}
+    )
+
+    phq9 = request_data.get("phq9")
+    bdi = request_data.get("bdi")
+    cesd = request_data.get("cesd")
+
+    provided_tests = [
+        test
+        for test in [phq9, bdi, cesd]
+        if test is not None
+    ]
+
+    if len(provided_tests) != 1:
+
+        return {
+            "success": False,
+            "message": (
+                "Exactly one of phq9, bdi, or cesd "
+                "must be provided"
+            ),
+            "status_code": 400
+        }
+
+    prediction_results = {
+        "phq9": phq9,
+        "bdi": bdi,
+        "cesd": cesd
+    }
+
+    saved_document = save_prediction(
+        user_id=user_id,
+        input_data=input_data,
+        prediction_results=prediction_results,
+        recommendation=None
+    )
+
+    return {
+        "success": True,
+        "prediction_id": str(
+            saved_document["_id"]
+        )
+    }

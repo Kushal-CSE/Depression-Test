@@ -26,9 +26,6 @@ def _get_predictions_collection() -> Collection:
 
 
 def save_prediction(
-        
-    
-
     *,
     user_id: str,
     input_data: Dict[str, Any],

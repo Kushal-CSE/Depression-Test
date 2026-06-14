@@ -191,7 +191,60 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## 4. Dashboard
+## 4. Save Manual Assessment
+
+
+### Endpoint
+
+```
+POST http://127.0.0.1:5000/predictions/save
+```
+
+### Authentication
+
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+### Request Body
+{
+    "input_data": {
+        "question_1": 2,
+        "question_2": 1,
+        "question_3": 3
+    },
+    "phq9": {
+        "score": 14,
+        "confidence": 100
+    }
+}
+
+### Response
+
+{
+    "success": true,
+    "message": "Manual test saved successfully",
+    "data": {
+        "success": true,
+        "prediction_id": "6a2f3e9b4f44271e38acb999"
+    }
+}
+
+
+### Description
+
+Save a manually completed depression assessment result.
+
+Exactly one of the following assessment types must be provided:
+
+phq9
+bdi
+cesd
+
+Any assessment type not provided will be stored as null.
+
+
+## 5. Dashboard
 
 ### Endpoint
 

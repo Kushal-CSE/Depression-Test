@@ -1,7 +1,8 @@
 from flask import Blueprint
 
 from app.controllers.prediction_controller import (
-    predict_controller
+    predict_controller,
+    save_manual_test_controller
 )
 
 from app.decorators.jwt_decorator import (
@@ -22,6 +23,15 @@ prediction_blueprint = Blueprint(
 @jwt_required()
 def predict_route():
     return predict_controller()
+
+
+@prediction_blueprint.route(
+    "/save",
+    methods=["POST"]
+)
+@jwt_required()
+def save_test_route():
+    return save_manual_test_controller()
 
 
 def register_prediction_routes(app):
