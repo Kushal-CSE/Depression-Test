@@ -98,12 +98,12 @@ export function HistoryList({ results, onDelete }: HistoryListProps) {
                     <div className="text-center">
                       <div className="text-xs text-gray-600 font-medium uppercase tracking-wider">Confidence</div>
                       <div className="font-bold text-2xl text-gray-900 mt-1">
-                        {(result.confidenceScore * 100).toFixed(0)}%
+                        {(result.confidenceScore ).toFixed(0)}%
                       </div>
                       <div className="w-20 h-1 bg-gray-200 rounded-full mt-2 overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full"
-                          style={{ width: `${result.confidenceScore * 100}%` }}
+                          style={{ width: `${result.confidenceScore }%` }}
                         />
                       </div>
                     </div>

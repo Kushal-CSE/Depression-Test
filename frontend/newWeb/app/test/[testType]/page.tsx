@@ -240,6 +240,7 @@ import { NavigationButtons } from '@/components/NavigationButtons';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { ChevronLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {useAuth} from '@/lib/contexts/AuthContext';
 
 export default function TestPage() {
   const params = useParams();
@@ -256,7 +257,7 @@ export default function TestPage() {
     previousQuestion,
     canProceed,
   } = useQuestionnaire();
-
+  const { token } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
@@ -285,6 +286,7 @@ export default function TestPage() {
       router.push('/');
     }
   }, [testType, router]);
+  
 
   const handleSubmit = useCallback(async () => {
     if (!testConfig) return;
@@ -317,7 +319,8 @@ export default function TestPage() {
       } else {
 
         console.log('[v0] Using ML API for complete assessment');
-        result = await submitToMLAPI(answers);
+        // result = await submitToMLAPI(answers);
+        result = await submitToMLAPI(answers, token);
       }
       saveAssessmentToHistory(result);
 

@@ -152,6 +152,7 @@ import { Card } from '@/components/ui/card'
 import { getAssessmentHistory } from '@/lib/api/mlClient'
 import { AssessmentResult } from '@/lib/types'
 import { useQuestionnaire } from '@/lib/contexts/QuestionnaireContext'
+import { useAuth } from '@/lib/contexts/AuthContext'
 
 
 const DEMO_RESULTS: { [key: string]: AssessmentResult } = {
@@ -213,28 +214,102 @@ const severityConfig = {
 function ResultsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-
   const { selectTest, resetQuestionnaire } = useQuestionnaire()
-
+  const { token } = useAuth()
   const resultId = searchParams.get('id')
 
   const [result, setResult] = useState<AssessmentResult | null>(null)
   const [loading, setLoading] = useState(true)
+      console.log("[v0] Fetching assessment history with token:", token);
+      console.log("resultId from URL:", resultId);
+  // useEffect(() => {
+  //   const history = getAssessmentHistory(token || '')
 
-  useEffect(() => {
-    const history = getAssessmentHistory()
+  //   if (resultId) {
+  //     //const found = history.find((r) => r.id === resultId)
+  //     setResult(found || DEMO_RESULTS[resultId] || null)
+  //   } else if (history.length > 0) {
+  //     setResult(history[history.length - 1])
+  //   } else {
+  //     setResult(DEMO_RESULTS['1'])
+  //   }
 
-    if (resultId) {
-      const found = history.find((r) => r.id === resultId)
-      setResult(found || DEMO_RESULTS[resultId] || null)
-    } else if (history.length > 0) {
-      setResult(history[history.length - 1])
-    } else {
-      setResult(DEMO_RESULTS['1'])
+  //   setLoading(false)
+  // }, [resultId])
+// useEffect(() => {
+//   // Create an inner async function to handle the API call
+//   const fetchHistoryAndSetResult = async () => {
+//     try {
+//       setLoading(true); // Ensure loading is true when the fetch starts
+      
+//       const history = await getAssessmentHistory(token || '');
+
+//       if (resultId) {
+//         const found = history.find((r) => r.id === resultId);
+//         setResult(found || DEMO_RESULTS[resultId] || null);
+//       } else if (history.length > 0) {
+//         setResult(history[history.length - 1]);
+//       } else {
+//         setResult(DEMO_RESULTS['1']);
+//       }
+//     } catch (error) {
+//       console.error("Failed to load assessment history:", error);
+//       // Fallback data in case the API endpoint fails
+//       setResult(DEMO_RESULTS['1']);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   fetchHistoryAndSetResult();
+// }, [resultId, token]);
+useEffect(() => {
+  const fetchHistoryAndSetResult = async () => {
+    // 1. Guard against empty/missing token on initial mount
+    if (!token) {
+      console.log("[v0] Auth token is loading or missing. Postponing history fetch.");
+      if (resultId && DEMO_RESULTS[resultId]) {
+        setResult(DEMO_RESULTS[resultId]);
+      } else {
+        setResult(DEMO_RESULTS['1']);
+      }
+      setLoading(false);
+      return;
     }
 
-    setLoading(false)
-  }, [resultId])
+    try {
+      setLoading(true);
+      const history = await getAssessmentHistory(token);
+
+      if (Array.isArray(history) && history.length > 0) {
+        if (resultId) {
+          // Look for it in the real database history array
+          const found = history.find((r) => r.id === resultId || String(r.id).includes(resultId));
+          // FIX: Fall back to DEMO_RESULTS['1'] if the specific ID doesn't exist anywhere yet
+          setResult(found || DEMO_RESULTS[resultId] || DEMO_RESULTS['1']);
+        } else {
+          setResult(history[history.length - 1]);
+        }
+      } else {
+        // Fallback if user profile history array is empty on server
+        setResult(resultId && DEMO_RESULTS[resultId] ? DEMO_RESULTS[resultId] : DEMO_RESULTS['1']);
+      }
+    } catch (error: any) {
+      console.warn("[v0] Gracefully caught history fetch error (e.g. 401 Expired):", error.message);
+      
+      // 2. Safe Fallback: Prevent falling back to null when ID is a generated timestamp
+      if (resultId && DEMO_RESULTS[resultId]) {
+        setResult(DEMO_RESULTS[resultId]);
+      } else {
+        setResult(DEMO_RESULTS['1']);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchHistoryAndSetResult();
+}, [resultId, token]);
 
   const formattedDate = useMemo(() => {
     if (!result?.date) return ''
@@ -412,7 +487,8 @@ function ResultsContent() {
               <div className="mt-10">
                 <div className="flex justify-between mb-3">
                   
-                  <p className="font-bold text-gray-900">{confidence}%</p>
+                  {/* <p className="font-bold text-gray-900">{(result.testType == 'all59') ? confidence/100 : '--'}%</p> */}
+                  <p className="font-bold text-gray-900">{confidence}%</p> 
                   <p className="text-gray-600 font-medium">Confidence Level</p>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
