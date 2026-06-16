@@ -60,7 +60,7 @@
 //         console.log('[v0] Using local scoring for', testType);
 //         const scoringFunction = getScoringFunction(testType as any);
 //         const scoringResult = scoringFunction(answers);
-        
+
 //         result = {
 //           id: Date.now().toString(),
 //           testType: testType as any,
@@ -79,10 +79,10 @@
 //         console.log('[v0] Using ML API for complete assessment');
 //         result = await submitToMLAPI(answers);
 //       }
-      
+
 //       // Save to localStorage
 //       saveAssessmentToHistory(result);
-      
+
 //       // Redirect to results
 //       console.log('[v0] Redirecting to results with result:', result.id);
 //       router.push(`/results?id=${result.id}`);
@@ -137,7 +137,7 @@
 //                 <div className="text-xs text-gray-500">of {testConfig.questions.length}</div>
 //               </div>
 //             </div>
-            
+
 //             {/* Progress Bar */}
 //             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
 //               <div
@@ -228,19 +228,23 @@
 // }
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useQuestionnaire } from '@/lib/contexts/QuestionnaireContext';
-import { getTestConfig } from '@/lib/data/testConfigs';
-import { submitAssessment, saveAssessmentToHistory, submitToMLAPI } from '@/lib/api/mlClient';
-import { getScoringFunction } from '@/lib/utils/scoring';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { QuestionCard } from '@/components/QuestionCard';
-import { NavigationButtons } from '@/components/NavigationButtons';
-import { Card } from '@/components/ui/card';
-import Link from 'next/link';
-import { ChevronLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
-import {useAuth} from '@/lib/contexts/AuthContext';
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useQuestionnaire } from "@/lib/contexts/QuestionnaireContext";
+import { getTestConfig } from "@/lib/data/testConfigs";
+import {
+  submitAssessment,
+  saveAssessmentToHistory,
+  submitToMLAPI,
+} from "@/lib/api/mlClient";
+import { getScoringFunction } from "@/lib/utils/scoring";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { QuestionCard } from "@/components/QuestionCard";
+import { NavigationButtons } from "@/components/NavigationButtons";
+import { Card } from "@/components/ui/card";
+import Link from "next/link";
+import { ChevronLeft, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function TestPage() {
   const params = useParams();
@@ -260,7 +264,9 @@ export default function TestPage() {
   const { token } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">(
+    "right",
+  );
   const [isSliding, setIsSliding] = useState(false);
 
   // Track slide direction when question changes
@@ -274,7 +280,7 @@ export default function TestPage() {
 
   // Initialize test on mount
   useEffect(() => {
-    console.log('[v0] Test page mounted with testType:', testType);
+    console.log("[v0] Test page mounted with testType:", testType);
     if (testType) {
       selectTest(testType as any);
     }
@@ -283,10 +289,9 @@ export default function TestPage() {
   // Redirect if test not found
   useEffect(() => {
     if (testType && !getTestConfig(testType)) {
-      router.push('/');
+      router.push("/");
     }
   }, [testType, router]);
-  
 
   const handleSubmit = useCallback(async () => {
     if (!testConfig) return;
@@ -296,40 +301,67 @@ export default function TestPage() {
 
     try {
       let result;
-      if (testType === 'phq9' || testType === 'bdi2' || testType === 'cesd') {
-        console.log('[v0] Using local scoring for', testType);
+      if (testType === "phq9" || testType === "bdi2" || testType === "cesd") {
+        console.log("[v0] Using local scoring for", testType);
         const scoringFunction = getScoringFunction(testType as any);
         const scoringResult = scoringFunction(answers);
-        
+        const backendTestKey = testType === "bdi2" ? "bdi" : testType;
+        const payload = {
+          input_data: answers,
+          [backendTestKey]: {
+            score: scoringResult.severity,
+            confidence: 100,
+          },
+        };
+        console.log("testType:", testType);
+        console.log("backendTestKey:", backendTestKey);
+        console.log("payload:", JSON.stringify(payload, null, 2));
+        const response = await fetch(
+          "http://127.0.0.1:5000/predictions/save", // your actual endpoint
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          },
+        );
+
+        const savedData = await response.json();
+
+        if (!response.ok) {
+          throw new Error(savedData.message || "Failed to save assessment");
+        }
         result = {
           id: Date.now().toString(),
           testType: testType as any,
           prediction: scoringResult.severity,
-
+          score: scoringResult.severity,
           confidenceScore: 0.95,
-
           mentalHealthTips: [
-            'Consider speaking with a mental health professional for personalized guidance.',
-            'Practice self-care activities that bring you joy and relaxation.',
-            'Maintain regular social connections and reach out for support when needed.'
+            "Consider speaking with a mental health professional for personalized guidance.",
+            "Practice self-care activities that bring you joy and relaxation.",
+            "Maintain regular social connections and reach out for support when needed.",
           ],
           date: new Date().toISOString(),
           _scoreLabel: scoringResult.label,
         };
       } else {
-
-        console.log('[v0] Using ML API for complete assessment');
+        console.log("[v0] Using ML API for complete assessment");
         // result = await submitToMLAPI(answers);
         result = await submitToMLAPI(answers, token);
       }
       saveAssessmentToHistory(result);
 
-      console.log('[v0] Redirecting to results with result:', result.id);
-      router.push(`/results?id=${result.id}`);
+      console.log("[v0] Redirecting to results with result:", result.id);
+      // router.push(`/results?id=${result.id}`);
+      router.push(`/results?result=${Date.now()}`);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit assessment';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to submit assessment";
       setError(errorMessage);
-      console.error('[v0] Error submitting assessment:', err);
+      console.error("[v0] Error submitting assessment:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -337,18 +369,17 @@ export default function TestPage() {
 
   const handleNext = () => {
     if (currentQuestionIndex < testConfig.questions.length - 1) {
-      setSlideDirection('right');
+      setSlideDirection("right");
       nextQuestion();
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
-      setSlideDirection('left');
+      setSlideDirection("left");
       previousQuestion();
     }
   };
-
 
   if (!testConfig) {
     return (
@@ -357,7 +388,6 @@ export default function TestPage() {
           <Card className="border-0 shadow-lg p-8 text-center bg-white">
             <div className="text-5xl mb-4 animate-pulse">⏳</div>
             <p className="text-gray-600 font-medium">Loading assessment...</p>
-
           </Card>
         </div>
       </main>
@@ -365,16 +395,21 @@ export default function TestPage() {
   }
 
   const currentQuestion = testConfig.questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === testConfig.questions.length - 1;
+  const isLastQuestion =
+    currentQuestionIndex === testConfig.questions.length - 1;
   const currentAnswer = answers[currentQuestion.id];
-  const progressPercent = ((currentQuestionIndex + 1) / testConfig.questions.length) * 100;
+  const progressPercent =
+    ((currentQuestionIndex + 1) / testConfig.questions.length) * 100;
 
   return (
     <ProtectedRoute>
       <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-3xl">
           <div className="mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mb-6 group transition-all">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mb-6 group transition-all"
+            >
               <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
               Back to Tests
             </Link>
@@ -382,17 +417,23 @@ export default function TestPage() {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{testConfig.name}</h1>
-                  <p className="text-gray-600 text-sm mt-1">{testConfig.description}</p>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {testConfig.name}
+                  </h1>
+                  <p className="text-gray-600 text-sm mt-1">
+                    {testConfig.description}
+                  </p>
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold text-blue-600">
                     {currentQuestionIndex + 1}
                   </div>
-                  <div className="text-xs text-gray-500 font-medium">of {testConfig.questions.length}</div>
+                  <div className="text-xs text-gray-500 font-medium">
+                    of {testConfig.questions.length}
+                  </div>
                 </div>
               </div>
-              
+
               <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
                 <div
                   className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-500 ease-out shadow-lg"
@@ -409,10 +450,13 @@ export default function TestPage() {
                   <AlertCircle className="h-6 w-6 text-red-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-red-900 mb-1">Submission Error</h3>
+                  <h3 className="font-bold text-red-900 mb-1">
+                    Submission Error
+                  </h3>
                   <p className="text-red-700 text-sm mb-2">{error}</p>
                   <p className="text-red-600 text-xs">
-                    Make sure your Flask server is running on http://localhost:5000
+                    Make sure your Flask server is running on
+                    http://localhost:5000
                   </p>
                 </div>
               </div>
@@ -420,13 +464,13 @@ export default function TestPage() {
           )}
 
           <div className="mb-8">
-            <div 
+            <div
               className={`transition-all duration-300 ease-out transform ${
-                isSliding 
-                  ? slideDirection === 'right' 
-                    ? 'animate-slide-in-right opacity-0 translate-x-10' 
-                    : 'animate-slide-in-left opacity-0 -translate-x-10'
-                  : 'opacity-100 translate-x-0'
+                isSliding
+                  ? slideDirection === "right"
+                    ? "animate-slide-in-right opacity-0 translate-x-10"
+                    : "animate-slide-in-left opacity-0 -translate-x-10"
+                  : "opacity-100 translate-x-0"
               }`}
             >
               <QuestionCard
@@ -445,7 +489,10 @@ export default function TestPage() {
               onNext={handleNext}
               onSubmit={handleSubmit}
               canPrevious={currentQuestionIndex > 0}
-              canNext={currentQuestionIndex < testConfig.questions.length - 1 && canProceed()}
+              canNext={
+                currentQuestionIndex < testConfig.questions.length - 1 &&
+                canProceed()
+              }
               canSubmit={canProceed()}
               isLoading={isSubmitting}
               isLastQuestion={isLastQuestion}
@@ -463,10 +510,10 @@ export default function TestPage() {
                   key={q.id}
                   className={`w-full aspect-square rounded-lg font-semibold text-xs flex items-center justify-center transition-all duration-200 ${
                     answers[q.id] !== undefined
-                      ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-md'
+                      ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-md"
                       : idx === currentQuestionIndex
-                        ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md ring-2 ring-blue-300 ring-offset-2'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md ring-2 ring-blue-300 ring-offset-2"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
                   {idx + 1}
@@ -475,10 +522,21 @@ export default function TestPage() {
             </div>
             <div className="flex items-center justify-between text-xs text-gray-600">
               <span>
-                <span className="font-semibold text-green-600">{Object.keys(answers).length}</span> of <span className="font-semibold">{testConfig.questions.length}</span> answered
+                <span className="font-semibold text-green-600">
+                  {Object.keys(answers).length}
+                </span>{" "}
+                of{" "}
+                <span className="font-semibold">
+                  {testConfig.questions.length}
+                </span>{" "}
+                answered
               </span>
               <span className="text-gray-500 font-medium">
-                {Math.round((Object.keys(answers).length / testConfig.questions.length) * 100)}% complete
+                {Math.round(
+                  (Object.keys(answers).length / testConfig.questions.length) *
+                    100,
+                )}
+                % complete
               </span>
             </div>
           </Card>
@@ -495,7 +553,7 @@ export default function TestPage() {
               transform: translateX(0);
             }
           }
-          
+
           @keyframes slideInLeft {
             from {
               opacity: 0;
@@ -506,11 +564,11 @@ export default function TestPage() {
               transform: translateX(0);
             }
           }
-          
+
           .animate-slide-in-right {
             animation: slideInRight 0.3s ease-out forwards;
           }
-          
+
           .animate-slide-in-left {
             animation: slideInLeft 0.3s ease-out forwards;
           }
@@ -519,4 +577,3 @@ export default function TestPage() {
     </ProtectedRoute>
   );
 }
-

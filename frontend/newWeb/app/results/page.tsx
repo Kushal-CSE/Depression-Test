@@ -197,13 +197,13 @@ const severityConfig = {
     border: 'border-yellow-200',
     progress: 'bg-yellow-600',
   },
-  'Moderately Severe': {
+  Severe: {
     badge: 'bg-orange-100 text-orange-800',
     bg: 'bg-orange-50',
     border: 'border-orange-200',
     progress: 'bg-orange-600',
   },
-  Severe: {
+  Extreme: {
     badge: 'bg-red-100 text-red-800',
     bg: 'bg-red-50',
     border: 'border-red-200',
@@ -280,11 +280,13 @@ useEffect(() => {
     try {
       setLoading(true);
       const history = await getAssessmentHistory(token);
-
+      console.log("[v0] Fetched assessment history:", history);
       if (Array.isArray(history) && history.length > 0) {
         if (resultId) {
           // Look for it in the real database history array
+        
           const found = history.find((r) => r.id === resultId || String(r.id).includes(resultId));
+          //const found= history[0];
           // FIX: Fall back to DEMO_RESULTS['1'] if the specific ID doesn't exist anywhere yet
           setResult(found || DEMO_RESULTS[resultId] || DEMO_RESULTS['1']);
         } else {
@@ -321,22 +323,31 @@ useEffect(() => {
     })
   }, [result])
 
-  const severity = result?._scoreLabel || 'Minimal'
+  // const severity = result?._scoreLabel || 'Minimal'
+  const severity =
+  result?.prediction === 0
+    ? "Minimal"
+    : result?.prediction === 1
+    ? "Mild"
+    : result?.prediction === 2
+    ? "Severe"
+    : result?.prediction === 3
+    ? "Extreme"
+    : "Unknown";
 
   const config =
     severityConfig[severity as keyof typeof severityConfig] ||
     severityConfig.Minimal
 
-  const confidence = Math.round((result?.confidenceScore || 0) * 100)
+  const confidence = Math.round((result?.confidenceScore || 0) )
 
   const score = (result as any)?.score ?? result?.prediction ?? 0
-  const maxScore = (result as any)?.maxScore || 27
+  const maxScore = (result as any)?.maxScore || 3
 
   const assessmentName = (result?.testType || 'Assessment').toUpperCase()
 
   const handleRetake = () => {
     if (!result) return
-
     selectTest(result.testType)
     router.push(`/test/${result.testType}`)
   }

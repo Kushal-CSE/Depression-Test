@@ -39,70 +39,70 @@ function fillDefaultFeatures(
 ): Record<string, number> {
   // Default feature values when not provided
   const defaultFeatures: Record<string, number> = {
-    "Gender": 0,
-    "Relationship_Status_Divorced": 0,
+    Gender: 0,
+    Relationship_Status_Divorced: 0,
     "Relationship_Status_In a Relationship": 0,
-    "Relationship_Status_Married": 0,
-    "Relationship_Status_Single": 0,
-    "Age": 22,
+    Relationship_Status_Married: 0,
+    Relationship_Status_Single: 0,
+    Age: 22,
     "Academic Status": 2,
-    "Work_While_Study": 0,
-    "Residential_Area_Hall": 0,
+    Work_While_Study: 0,
+    Residential_Area_Hall: 0,
     "Residential_Area_With family": 0,
     "Residential_Area_Outside Hall": 0,
     "Social Economic Status": 2,
-    "Financial_Pressure": 0,
-    "Has_Debts": 0,
-    "Satisfied_Living_Environment": 1,
-    "Lost_Someone_Recently": 0,
-    "Physical_Activity": 1,
-    "Significant_Ailments": 0,
-    "On_Medication": 0,
-    "Smoking": 0,
-    "Alcohol_Consumption": 0,
-    "Sleep_Duration": 7,
-    "Social_Media_Hours": 2,
-    "Workload_Academic_Demand": 1,
-    "Melancholic": 0,
-    "Future_Hopelessness": 0,
-    "Self_Perceived_Failure": 0,
-    "Interest_Loss": 0,
-    "Meaninglessness": 0,
-    "Hopelessness_EndFeeling": 0,
-    "Feeling_Insignificant": 0,
-    "Self_Confidence_Erosion": 0,
-    "Suicidal_Thoughts": 0,
-    "Crying_Frequency": 0,
-    "Agitation_Level": 0,
-    "Social_Withdrawal": 0,
-    "Indecisiveness": 0,
-    "Anhedonia_No_Joy": 0,
-    "Fatigue_Frequency": 0,
-    "Insomnia": 0,
-    "Irritability": 0,
-    "Low_Appetite": 0,
-    "Difficulty_Focusing": 0,
-    "Easy_Fatigue": 0,
-    "Low_Concentration": 0,
-    "Difficulty_Speaking_Socially": 0,
-    "High_Appetite": 0,
-    "Restlessness": 0,
-    "Life_Feels_Hard": 0,
-    "Fear_Something_Bad": 0,
-    "Recent_Abuse_Experience": 0,
-    "Feels_Pitied": 0,
-    "Lack_of_Pleasure": 0,
-    "Feeling_Down": 0,
-    "Feels_Others_Are_Kind": 1,
-    "Performance_Decline": 0,
-    "Share_Feelings_Lack": 0,
-    "Social_LeftOut_Level": 0,
-    "Isolation_Frequency": 0,
-    "No_Support_Frequency": 0,
-    "Loneliness_Frequency": 0,
-    "Emotional_Alignment_Frequency": 2,
-    "Presence_Not_Genuine_Frequency": 2,
-    "Relationships_Unimportant_Level": 2,
+    Financial_Pressure: 0,
+    Has_Debts: 0,
+    Satisfied_Living_Environment: 1,
+    Lost_Someone_Recently: 0,
+    Physical_Activity: 1,
+    Significant_Ailments: 0,
+    On_Medication: 0,
+    Smoking: 0,
+    Alcohol_Consumption: 0,
+    Sleep_Duration: 7,
+    Social_Media_Hours: 2,
+    Workload_Academic_Demand: 1,
+    Melancholic: 0,
+    Future_Hopelessness: 0,
+    Self_Perceived_Failure: 0,
+    Interest_Loss: 0,
+    Meaninglessness: 0,
+    Hopelessness_EndFeeling: 0,
+    Feeling_Insignificant: 0,
+    Self_Confidence_Erosion: 0,
+    Suicidal_Thoughts: 0,
+    Crying_Frequency: 0,
+    Agitation_Level: 0,
+    Social_Withdrawal: 0,
+    Indecisiveness: 0,
+    Anhedonia_No_Joy: 0,
+    Fatigue_Frequency: 0,
+    Insomnia: 0,
+    Irritability: 0,
+    Low_Appetite: 0,
+    Difficulty_Focusing: 0,
+    Easy_Fatigue: 0,
+    Low_Concentration: 0,
+    Difficulty_Speaking_Socially: 0,
+    High_Appetite: 0,
+    Restlessness: 0,
+    Life_Feels_Hard: 0,
+    Fear_Something_Bad: 0,
+    Recent_Abuse_Experience: 0,
+    Feels_Pitied: 0,
+    Lack_of_Pleasure: 0,
+    Feeling_Down: 0,
+    Feels_Others_Are_Kind: 1,
+    Performance_Decline: 0,
+    Share_Feelings_Lack: 0,
+    Social_LeftOut_Level: 0,
+    Isolation_Frequency: 0,
+    No_Support_Frequency: 0,
+    Loneliness_Frequency: 0,
+    Emotional_Alignment_Frequency: 2,
+    Presence_Not_Genuine_Frequency: 2,
+    Relationships_Unimportant_Level: 2,
   };
 
   // Merge provided features with defaults
@@ -470,13 +470,38 @@ const DASHBOARD_API_URL = "http://127.0.0.1:5000/dashboard";
 /**
  * Helper to map the remote backend history items into your local AssessmentResult interface
  */
-function mapApiHistoryToAssessmentResults(apiHistory: ApiResponseHistoryItem[]): AssessmentResult[] {
+function mapApiHistoryToAssessmentResults(
+  apiHistory: ApiResponseHistoryItem[],
+): AssessmentResult[] {
   return apiHistory.map((item, index) => {
-    const targetMetrics = item.prediction_value.bdi || item.prediction_value.phq9;
-    
+    const targetMetrics =
+  item.prediction_value.bdi ||
+  item.prediction_value.phq9 ||
+  item.prediction_value.cesd;
+    let testType: TestType = "all59";
+
+    if (
+      item.prediction_value.phq9 &&
+      !item.prediction_value.bdi &&
+      !item.prediction_value.cesd
+    ) {
+      testType = "phq9";
+    } else if (
+      item.prediction_value.bdi &&
+      !item.prediction_value.phq9 &&
+      !item.prediction_value.cesd
+    ) {
+      testType = "bdi2";
+    } else if (
+      item.prediction_value.cesd &&
+      !item.prediction_value.phq9 &&
+      !item.prediction_value.bdi
+    ) {
+      testType = "cesd";
+    }
     return {
       id: `remote-${index}-${new Date(item.date).getTime()}`,
-      testType: "all59", 
+      testType: testType,
       date: item.date,
       answers: {}, // The dashboard endpoint payload doesn't return raw question blocks
       prediction: targetMetrics.score as 0 | 1 | 2 | 3,
@@ -490,10 +515,13 @@ function mapApiHistoryToAssessmentResults(apiHistory: ApiResponseHistoryItem[]):
  * Get assessment history from the Flask API instead of localStorage
  * Kept the name, added token tracking for the Authorization header
  */
-export async function getAssessmentHistory(token: string): Promise<AssessmentResult[]> {
+export async function getAssessmentHistory(
+  token: string,
+): Promise<AssessmentResult[]> {
   try {
     console.log("[v0] Fetching assessment history from API with token:", token);
-    if (!token) throw new Error("Authentication token is required to fetch history.");
+    if (!token)
+      throw new Error("Authentication token is required to fetch history.");
 
     const response = await fetch(DASHBOARD_API_URL, {
       method: "GET",
@@ -509,11 +537,11 @@ export async function getAssessmentHistory(token: string): Promise<AssessmentRes
     }
 
     const resBody: DashboardApiResponse = await response.json();
-    
+
     if (resBody.success && resBody.data?.history) {
       return mapApiHistoryToAssessmentResults(resBody.data.history);
     }
-    
+
     return [];
   } catch (error) {
     console.error("[v0] Error retrieving assessment history from API:", error);
@@ -522,18 +550,25 @@ export async function getAssessmentHistory(token: string): Promise<AssessmentRes
 }
 
 /**
- * Kept the name. Since submitToMLAPI handles data registration via POST, 
+ * Kept the name. Since submitToMLAPI handles data registration via POST,
  * this can act as a placeholder or log indicator.
  */
-export async function saveAssessmentToHistory(result: AssessmentResult, token?: string): Promise<void> {
-  console.log("[v0] saveAssessmentToHistory is handled server-side during evaluation.");
+export async function saveAssessmentToHistory(
+  result: AssessmentResult,
+  token?: string,
+): Promise<void> {
+  console.log(
+    "[v0] saveAssessmentToHistory is handled server-side during evaluation.",
+  );
 }
 
 /**
  * Kept the name. Clears remote references if needed, or logs action.
  */
 export async function clearAssessmentHistory(token?: string): Promise<void> {
-  console.log("[v0] Clear requested. Persistent history is managed by backend database.");
+  console.log(
+    "[v0] Clear requested. Persistent history is managed by backend database.",
+  );
 }
 
 /**

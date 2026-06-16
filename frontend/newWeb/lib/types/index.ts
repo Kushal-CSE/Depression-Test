@@ -34,6 +34,7 @@ export interface AssessmentResult {
   date: string;
   answers: Record<string, number>;
   prediction: SeverityLevel;
+  score?: number; 
   confidenceScore: number;
   mentalHealthTips: string[];
   _scoreLabel?: string; // Optional label for calculated tests (e.g., "Mild", "Moderate")

@@ -292,6 +292,7 @@ import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { TrendingUp, Target, AlertCircle, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // Dummy user data
 const DUMMY_USER = {
@@ -303,38 +304,38 @@ const DUMMY_USER = {
 
 // Dummy assessment data
 const DUMMY_ASSESSMENTS: AssessmentResult[] = [
-  {
-    id: '1',
-    testType: 'phq9',
-    prediction: 1,
-    confidenceScore: 87,
-    mentalHealthTips: ['Consider regular exercise', 'Practice meditation daily', 'Get 7-8 hours of sleep'],
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '2',
-    testType: 'bdi2',
-    prediction: 2,
-    confidenceScore: 92,
-    mentalHealthTips: ['Schedule time with friends', 'Try cognitive behavioral therapy', 'Keep a mood journal'],
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '3',
-    testType: 'cesd',
-    prediction: 1,
-    confidenceScore: 81,
-    mentalHealthTips: ['Maintain consistent routines', 'Eat nutritious meals', 'Limit caffeine intake'],
-    date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: '5',
-    testType: 'phq9',
-    prediction: 2,
-    confidenceScore: 85,
-    mentalHealthTips: ['Consider professional help', 'Practice self-compassion', 'Join a support group'],
-    date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-  },
+  // {
+  //   id: '1',
+  //   testType: 'phq9',
+  //   prediction: 1,
+  //   confidenceScore: 87,
+  //   mentalHealthTips: ['Consider regular exercise', 'Practice meditation daily', 'Get 7-8 hours of sleep'],
+  //   date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  // },
+  // {
+  //   id: '2',
+  //   testType: 'bdi2',
+  //   prediction: 2,
+  //   confidenceScore: 92,
+  //   mentalHealthTips: ['Schedule time with friends', 'Try cognitive behavioral therapy', 'Keep a mood journal'],
+  //   date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  // },
+  // {
+  //   id: '3',
+  //   testType: 'cesd',
+  //   prediction: 1,
+  //   confidenceScore: 81,
+  //   mentalHealthTips: ['Maintain consistent routines', 'Eat nutritious meals', 'Limit caffeine intake'],
+  //   date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+  // },
+  // {
+  //   id: '5',
+  //   testType: 'phq9',
+  //   prediction: 2,
+  //   confidenceScore: 85,
+  //   mentalHealthTips: ['Consider professional help', 'Practice self-compassion', 'Join a support group'],
+  //   date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+  // },
 ];
 
 export default function DashboardPage() {
@@ -343,11 +344,13 @@ export default function DashboardPage() {
   const [sortBy, setSortBy] = useState<'date' | 'severity'>('date');
   const [loading, setLoading] = useState<boolean>(true);
   const { token } = useAuth();
-
+  const { user } = useAuth();
+  const router = useRouter();
   // Load data immediately when component mounts or token resolves
   useEffect(() => {
     const loadAssessments = async () => {
       if (!token) {
+        router.push('auth/login');
         console.log("[v0] Auth token not present yet. Postponing dashboard metrics query.");
         return;
       }
@@ -389,6 +392,8 @@ export default function DashboardPage() {
     };
 
     loadAssessments();
+    console.log("sortedHistory =>", sortedHistory);
+
   }, [token]);
 
   const handleDelete = (id: string) => {
@@ -459,9 +464,9 @@ export default function DashboardPage() {
                   {DUMMY_USER.avatar}
                 </div>
                 <div className="text-white flex-grow">
-                  <h2 className="text-3xl font-bold">{DUMMY_USER.name}</h2>
-                  <p className="text-blue-100 text-sm">{DUMMY_USER.email}</p>
-                  <p className="text-blue-100 text-xs mt-1">Member since {new Date(DUMMY_USER.joinedDate).toLocaleDateString()}</p>
+                  <h2 className="text-3xl font-bold">{user?.name}</h2>
+                  <p className="text-blue-100 text-sm">{user?.email}</p>
+                  {/* <p className="text-blue-100 text-xs mt-1">Member since {new Date(user?.joinedDate).toLocaleDateString()}</p> */}
                 </div>
               </div>
             </div>
@@ -581,6 +586,7 @@ export default function DashboardPage() {
               )}
 
               {/* Assessment List */}
+              
               <HistoryList results={sortedHistory} onDelete={handleDelete} />
 
               {/* Empty State */}
