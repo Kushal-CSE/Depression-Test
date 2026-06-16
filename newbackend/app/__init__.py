@@ -30,9 +30,10 @@ from app.middleware.error_middleware import (
 )
 
 # Database
+from app.database.init_db import initialize_database
 from app.database.database import (
     connect_database,
-    close_database
+    # close_database
 )
 
 # ML initialization
@@ -48,7 +49,7 @@ def create_app() -> Flask:
     # Initialize database connection
     with app.app_context():
         connect_database()
-
+        initialize_database()
     # Initialize ML models
     with app.app_context():
         initialize_ml_models()
@@ -100,9 +101,9 @@ def create_app() -> Flask:
     register_history_routes(app)
     register_dashboard_routes(app)
 
-    # Graceful DB cleanup
-    @app.teardown_appcontext
-    def shutdown_db(exception=None):
-        close_database()
+    # # Graceful DB cleanup
+    # @app.teardown_appcontext
+    # def shutdown_db(exception=None):
+    #     close_database()
 
     return app

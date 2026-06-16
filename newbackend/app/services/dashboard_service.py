@@ -11,7 +11,7 @@ def get_dashboard_data(
 
     history = get_user_prediction_history(
         user_id=user["id"],
-        limit=20
+        limit=200
     )
 
     return {

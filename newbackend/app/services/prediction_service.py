@@ -219,7 +219,5 @@ def save_manual_test(
 
     return {
         "success": True,
-        "prediction_id": str(
-            saved_document["_id"]
-        )
+        "prediction_id": saved_document["prediction_id"]
     }
