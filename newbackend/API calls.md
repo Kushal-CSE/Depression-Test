@@ -207,17 +207,87 @@ Authorization: Bearer <JWT_TOKEN>
 ```
 
 ### Request Body
+```
 {
     "input_data": {
-        "question_1": 2,
-        "question_2": 1,
-        "question_3": 3
+        "Agitation_Level": 3,
+        "Difficulty_Focusing": 0,
+        "Feeling_Down": 1,
+        "Fatigue_Frequency": 0,
+        "Insomnia": 2,
+        "Interest_Loss": 2,
+        "Low_Appetite": 0,
+        "Self_Perceived_Failure": 1,
+        "Suicidal_Thoughts": 1
     },
     "phq9": {
         "score": 14,
         "confidence": 100
     }
 }
+```
+------------------------------------------------------------------
+```
+{
+    "input_data": {
+        "Agitation_Level": 3,
+        "Anhedonia_No_Joy": 2,
+        "Crying_Frequency": 1,
+        "Difficulty_Focusing": 0,
+        "Easy_Fatigue": 2,
+        "Fatigue_Frequency": 1,
+        "Feeling_Insignificant": 2,
+        "Future_Hopelessness": 3,
+        "Hopelessness_EndFeeling": 1,
+        "Indecisiveness": 0,
+        "Insomnia": 2,
+        "Interest_Loss": 3,
+        "Irritability": 1,
+        "Low_Appetite": 0,
+        "Meaninglessness": 2,
+        "Melancholic": 1,
+        "Self_Confidence_Erosion": 3,
+        "Self_Perceived_Failure": 2,
+        "Social_Withdrawal": 1,
+        "Suicidal_Thoughts": 2
+    },
+    "bdi": {
+        "score": 32,
+        "confidence": 100
+    }
+}
+```
+--------------------------------------------------------------
+```
+{
+    "input_data": {
+        "Agitation_Level": 2,
+        "Anhedonia_No_Joy": 1,
+        "Crying_Frequency": 0,
+        "Difficulty_Focusing": 3,
+        "Fatigue_Frequency": 1,
+        "Feeling_Down": 2,
+        "Future_Hopelessness": 3,
+        "Hopelessness_EndFeeling": 2,
+        "Indecisiveness": 1,
+        "Insomnia": 0,
+        "Interest_Loss": 2,
+        "Irritability": 1,
+        "Isolation_Frequency": 3,
+        "Loneliness_Frequency": 2,
+        "Low_Appetite": 0,
+        "Meaninglessness": 2,
+        "Melancholic": 1,
+        "Performance_Decline": 3,
+        "Self_Confidence_Erosion": 2,
+        "Social_Withdrawal": 1
+    },
+    "cesd": {
+        "score": 32,
+        "confidence": 100
+    }
+}
+```
 
 ### Response
 
@@ -290,6 +360,51 @@ Authorization: Bearer <JWT_TOKEN>
             }
         ]
     }
+}
+```
+
+```
+{
+    "data": {
+        "history": [
+            {
+                "date": "2026-06-15T07:12:11.358069+00:00",
+                "prediction_value": {
+                    "bdi": null,
+                    "cesd": null,
+                    "phq9": {
+                        "confidence": 100,
+                        "score": 14
+                    }
+                },
+                "recommendation": null
+            },
+            {
+                "date": "2026-06-15T07:11:32.930765+00:00",
+                "prediction_value": {
+                    "bdi": {
+                        "confidence": 97.0,
+                        "score": 2
+                    },
+                    "cesd": {
+                        "confidence": 76.51,
+                        "score": 2
+                    },
+                    "phq9": {
+                        "confidence": 51.5,
+                        "score": 2
+                    }
+                },
+                "recommendation": "⚠️ Ollama service not running. Please start Ollama first (ollama serve)"
+            }
+        ],
+        "user": {
+            "email": "kushal1@test.com",
+            "id": "6a2133ec47e00909cc1b45ec",
+            "name": "Kusha1"
+        }
+    },
+    "success": true
 }
 ```
 
