@@ -7,6 +7,11 @@ from app.services.prediction_service import (
     save_manual_test
 )
 
+from app.services.prediction_details_service import (
+    get_prediction_details,
+    delete_prediction_by_id
+)
+
 from app.utils.response import (
     success_response,
     error_response
@@ -227,6 +232,137 @@ def save_manual_test_controller():
             "Unhandled manual test controller error",
             {
                 "error": str(error)
+            }
+        )
+
+        return error_response(
+            message="Internal server error",
+            status_code=500
+        )
+    
+def get_prediction_controller(
+    prediction_id: str
+):
+    """
+    Get a prediction by prediction_id.
+    """
+
+    try:
+
+        current_user = getattr(
+            g,
+            "current_user",
+            {}
+        )
+
+        user_id = current_user.get("id")
+
+        prediction = get_prediction_details(
+            prediction_id=prediction_id,
+            user_id=user_id
+        )
+        if prediction is None:
+
+            return error_response(
+                message="Prediction not found",
+                status_code=404
+            )
+
+        return success_response(
+            message="Prediction fetched successfully",
+            data=prediction,
+            status_code=200
+        )
+
+    except RuntimeError as error:
+
+        log_error(
+            "Prediction fetch error",
+            {
+                "error": str(error),
+                "prediction_id": prediction_id
+            }
+        )
+
+        return error_response(
+            message="Failed to retrieve prediction",
+            status_code=500
+        )
+
+    except Exception as error:
+
+        log_error(
+            "Unhandled prediction fetch error",
+            {
+                "error": str(error),
+                "prediction_id": prediction_id
+            }
+        )
+
+        return error_response(
+            message="Internal server error",
+            status_code=500
+        )
+    
+def delete_prediction_controller(
+    prediction_id: str
+):
+    """
+    Delete a prediction by prediction_id.
+    """
+
+    try:
+
+        current_user = getattr(
+            g,
+            "current_user",
+            {}
+        )
+
+        user_id = current_user.get("id")
+
+        deleted = delete_prediction_by_id(
+            prediction_id=prediction_id,
+            user_id=user_id
+        )
+
+        if not deleted:
+
+            return error_response(
+                message="Prediction not found",
+                status_code=404
+            )
+
+        return success_response(
+            message="Prediction deleted successfully",
+            data={
+                "prediction_id": prediction_id
+            },
+            status_code=200
+        )
+
+    except RuntimeError as error:
+
+        log_error(
+            "Prediction delete error",
+            {
+                "error": str(error),
+                "prediction_id": prediction_id
+            }
+        )
+
+        return error_response(
+            message="Failed to delete prediction",
+            status_code=500
+        )
+
+    except Exception as error:
+
+        log_error(
+            "Unhandled prediction delete error",
+            {
+                "error": str(error),
+                "prediction_id": prediction_id
             }
         )
 

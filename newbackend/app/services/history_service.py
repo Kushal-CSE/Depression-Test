@@ -23,6 +23,9 @@ def get_user_prediction_history(
 
         history.append(
             {
+                "prediction_id": prediction.get(
+                    "prediction_id"
+                ),
                 "date": prediction.get(
                     "created_at"
                 ),

@@ -3,7 +3,9 @@ from flask_cors import cross_origin
 
 from app.controllers.prediction_controller import (
     predict_controller,
-    save_manual_test_controller
+    save_manual_test_controller,
+    get_prediction_controller,
+    delete_prediction_controller
 )
 
 from app.decorators.jwt_decorator import (
@@ -41,6 +43,32 @@ def predict_route():
 def save_test_route():
     return save_manual_test_controller()
 
+@prediction_blueprint.route(
+    "/<string:prediction_id>",
+    methods=["GET"]
+)
+@jwt_required()
+def get_prediction_route(
+    prediction_id: str
+):
+    return get_prediction_controller(
+        prediction_id
+    )
+
+
+@prediction_blueprint.route(
+    "/<string:prediction_id>",
+    methods=["DELETE"]
+)
+@jwt_required()
+def delete_prediction_route(
+    prediction_id: str
+):
+    return delete_prediction_controller(
+        prediction_id
+    )
 
 def register_prediction_routes(app):
-    app.register_blueprint(prediction_blueprint)
+    app.register_blueprint(
+        prediction_blueprint
+    )

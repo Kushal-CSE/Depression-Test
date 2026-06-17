@@ -57,7 +57,7 @@ def get_prediction_history_controller():
         history = (
             get_user_prediction_history(
                 user_id=user_id,
-                limit=20
+                limit=200
             )
         )
 

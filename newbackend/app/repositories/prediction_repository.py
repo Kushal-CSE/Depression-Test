@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from bson import ObjectId
-from bson.errors import InvalidId
+import uuid
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
@@ -32,11 +31,9 @@ def save_prediction(
     prediction_results: Dict[str, Any],
     recommendation: Optional[str] = None
 ) -> Dict[str, Any]:
-    """
-    Save prediction history record.
-    """
 
     document = {
+        "prediction_id": uuid.uuid4().hex,
         "user_id": user_id,
         "created_at": get_current_timestamp(),
         "input_data": input_data,
@@ -44,18 +41,13 @@ def save_prediction(
         "recommendation": recommendation
     }
 
-    # print("SAVING PREDICTION:")
-    # print(document)
-
     try:
-
         result = (
             _get_predictions_collection()
             .insert_one(document)
         )
 
     except PyMongoError as error:
-
         raise RuntimeError(
             "Failed to save prediction"
         ) from error
@@ -103,29 +95,16 @@ def get_prediction_history(
 def get_prediction_by_id(
     prediction_id: str
 ) -> Optional[Dict[str, Any]]:
-    """
-    Get prediction by ID.
-    """
 
     try:
-        object_id = ObjectId(
-            prediction_id
-        )
-
-    except InvalidId:
-        return None
-
-    try:
-
         return (
             _get_predictions_collection()
-            .find_one(
-                {"_id": object_id}
-            )
+            .find_one({
+                "prediction_id": prediction_id
+            })
         )
 
     except PyMongoError as error:
-
         raise RuntimeError(
             "Failed to retrieve prediction"
         ) from error
@@ -133,31 +112,16 @@ def get_prediction_by_id(
 def delete_prediction(
     prediction_id: str
 ) -> bool:
-    """
-    Delete prediction by ID.
-    """
 
     try:
-
-        object_id = ObjectId(
-            prediction_id
-        )
-
-    except InvalidId:
-
-        return False
-
-    try:
-
         result = (
             _get_predictions_collection()
-            .delete_one(
-                {"_id": object_id}
-            )
+            .delete_one({
+                "prediction_id": prediction_id
+            })
         )
 
     except PyMongoError as error:
-
         raise RuntimeError(
             "Failed to delete prediction"
         ) from error
