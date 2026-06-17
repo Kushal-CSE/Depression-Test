@@ -1,5 +1,37 @@
 from flask import Flask
+# In newbackend/app/__init__.py, add this import at the top
+from flask_cors import CORS
 
+def create_app() -> Flask:
+    app = Flask(__name__)
+
+    # Load configuration
+    app.config.from_object(load_config())
+
+    # ✅ Initialize CORS BEFORE middleware/routes
+    CORS(
+        app,
+        resources={
+            r"/*": {
+                "origins": [
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000",
+                    "http://localhost:3001"
+                ],
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization"
+                ],
+                "expose_headers": [
+                    "Content-Type",
+                    "Authorization"
+                ],
+                "supports_credentials": True,
+                "max_age": 3600
+            }
+        }
+    )
 from app.config import load_config
 
 # Route registration

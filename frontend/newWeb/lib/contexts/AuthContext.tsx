@@ -153,8 +153,8 @@
 //   return context;
 // }
 "use client";
-
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import {jwtDecode} from "jwt-decode";
 export interface User {
   id: string;
   name: string;
@@ -320,13 +320,99 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // const logout = () => {
+  //   setUser(null);
+  //   setToken(null);
+
+  //   localStorage.removeItem("auth_token");
+  //   localStorage.removeItem("auth_user");
+  // };
+  const TOKEN_EXPIRY_MS = 1800000;
+  const logoutTimerRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    // 1. Initial check: Retrieve token on app mount
+    const savedToken = localStorage.getItem('auth_token');
+    if (!savedToken) return;
+
+    try {
+      const decoded: any = jwtDecode(savedToken);
+      const currentTime = Date.now() / 1000; // Convert to seconds
+
+      // If it's already expired, wipe it instantly
+      if (decoded.exp < currentTime) {
+        logout();
+        return;
+      }
+
+      // 2. Set state if valid
+      setToken(savedToken);
+
+      // 3. Schedule automatic wipe for the exact millisecond it expires
+      const timeLeftInSeconds = decoded.exp - currentTime;
+      const timeoutId = setTimeout(() => {
+        alert("Your session has expired. Please log in again.");
+        logout();
+      }, timeLeftInSeconds * 1000);
+
+      // Cleanup timeout if token changes or component unmounts
+      return () => clearTimeout(timeoutId);
+
+    } catch (error) {
+      console.error("[Auth] Invalid token parsed, purging storage:", error);
+      logout();
+    }
+  }, [token]);
   const logout = () => {
     setUser(null);
     setToken(null);
-
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_user");
+
+    // Clean up the timer if it exists
+    // if (logoutTimerRef.current) {
+    //   clearTimeout(logoutTimerRef.current);
+    //   logoutTimerRef.current = null;
+    // }
+    // console.log("[v0] Token expired or user logged out. Session deleted.");
   };
+
+  /**
+   * Starts a 30-minute countdown to automatically wipe out the token
+   */
+  const startAutoLogoutTimer = () => {
+    if (logoutTimerRef.current) {
+      clearTimeout(logoutTimerRef.current);
+    }
+    
+    logoutTimerRef.current = setTimeout(() => {
+      logout();
+    }, TOKEN_EXPIRY_MS);
+  };
+
+  // Restore auth state on app load
+  useEffect(() => {
+    try {
+      const savedToken = localStorage.getItem("auth_token");
+      const savedUser = localStorage.getItem("auth_user");
+
+      if (savedToken && savedUser) {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+        // Start the timer on page refresh if the user is logged in
+        startAutoLogoutTimer();
+      }
+    } catch (error) {
+      console.error("[v0] Failed to restore auth:", error);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+
+    // Cleanup timer on component unmount
+    return () => {
+      if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
+    };
+  }, []);
 
   return (
     <AuthContext.Provider

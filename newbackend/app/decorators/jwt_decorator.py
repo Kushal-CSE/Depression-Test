@@ -1,7 +1,8 @@
 from functools import wraps
 from typing import Callable
 
-from flask import request, jsonify, g
+from flask import Flask, request, jsonify, g
+from flask_cors import CORS
 
 from app.services.jwt_service import (
     extract_token,
@@ -9,7 +10,26 @@ from app.services.jwt_service import (
     verify_token
 )
 
+app = Flask(__name__)
 
+# CORS setup FIRST, before blueprints
+CORS(
+    app,
+    resources={
+        r"/*": {
+            "origins": [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://localhost:3001"
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "expose_headers": ["Content-Type"],
+            "supports_credentials": True,
+            "max_age": 3600
+        }
+    }
+)
 def jwt_required():
     """
     Require valid access token.
@@ -19,9 +39,19 @@ def jwt_required():
 
         @wraps(function)
         def wrapper(*args, **kwargs):
+            print("=" * 50)
+            print("METHOD:", request.method)
+            print("PATH:", request.path)
+            print("AUTH HEADER:", request.headers.get("Authorization"))
+            print("=" * 50)
 
+            # Allow CORS preflight requests
+            if request.method == "OPTIONS":
+                return "", 204
+            
+            
             token = extract_token(request)
-
+            print("Extracted token:", token)
             if not token:
                 return jsonify({
                     "success": False,
@@ -63,6 +93,8 @@ def optional_jwt():
 
         @wraps(function)
         def wrapper(*args, **kwargs):
+            if request.method == "OPTIONS":
+                return "", 204
 
             token = extract_token(request)
 

@@ -24,7 +24,9 @@ def authenticate_request():
     """
     Authenticate protected routes using JWT.
     """
-
+    if request.method == "OPTIONS":
+        return None
+    
     if request.path in PUBLIC_ROUTES:
         return None
 
