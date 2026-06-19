@@ -5,9 +5,10 @@ import {
   TestConfig,
 } from "../types";
 import { getTestConfig } from "../data/testConfigs";
+import { es } from "date-fns/locale/es";
 
 // const FLASK_API_URL = 'http://127.0.0.1:5000';
-const FLASK_API_URL = "http://127.0.0.1:5000";
+const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
 
 /**
  * Maps answers from our UI format to the ML model's expected feature format
@@ -292,7 +293,7 @@ export async function submitToMLAPI(
   // );
 
   // Enforce absolute fallback to 127.0.0.1 if your env variable is missing/wrong
-  const targetUrl = "http://127.0.0.1:5000/predictions/predict";
+  const targetUrl = `${FLASK_API_URL}/predictions/predict`;
   try {
     const response = await fetch(targetUrl, {
       method: "POST",
@@ -470,7 +471,7 @@ interface DashboardApiResponse {
   };
 }
 
-const DASHBOARD_API_URL = "http://127.0.0.1:5000/dashboard";
+const DASHBOARD_API_URL = `${FLASK_API_URL}/dashboard`;
 
 /**
  * Helper to map the remote backend history items into your local AssessmentResult interface
@@ -644,7 +645,7 @@ export async function clearAssessmentHistory(
 ): Promise<void> {
   try {
     const response = await fetch(
-      `http://localhost:5000/predictions/${predictionId}`,
+      `${FLASK_API_URL}/predictions/${predictionId}`,
       {
         method: "DELETE",
         headers: {

@@ -5,7 +5,7 @@
 Flask
 Flask-Cors
 Werkzeug
-
+gunicorn
 # =========================================
 # ENVIRONMENT VARIABLES
 # =========================================

@@ -113,8 +113,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signup = async (name: string, email: string, password: string) => {
+    const url=process.env.FLASK_API_URL||"http://127.0.1:5000";
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/signup", {
+      const response = await fetch(`${url}/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -325,8 +325,9 @@ export default function TestPage() {
         console.log("testType:", testType);
         console.log("backendTestKey:", backendTestKey);
         console.log("payload:", JSON.stringify(payload, null, 2));
+        const url=process.env.FLASK_API_URL||"http://127.0.0.1:5000";
         const response = await fetch(
-          "http://127.0.0.1:5000/predictions/save", // your actual endpoint
+          `${url}/predictions/save`, // your actual endpoint
           {
             method: "POST",
             headers: {

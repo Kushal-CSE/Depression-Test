@@ -21,6 +21,7 @@ if __name__ == "__main__":
         resources={
             r"/*": {
                 "origins": [
+                    os.getenv("FRONTEND_URL", "http://localhost:3000"),
                     "http://localhost:3000", 
                     "http://127.0.0.1:3000", 
                     "http://localhost:3001"
