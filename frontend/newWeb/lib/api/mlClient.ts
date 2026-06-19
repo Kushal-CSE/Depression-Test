@@ -276,19 +276,19 @@ export async function submitToMLAPI(
     const val = rawMappedFeatures[key];
     cleanPayload[key] = val !== undefined && val !== null ? val : 0;
   });
-  console.log(JSON.stringify(token));
-  console.log("Contains newline?", token.includes("\n"));
-  console.log("Token length:", token.length);
-  console.log("Trimmed length:", token.trim().length);
-  console.log("AUTH HEADER:", `Bearer ${token?.trim()}`);
-  console.log(
-    "[ML Client] Cleaned payload prepared with exact 64 features.",
-    cleanPayload,
-  );
-  console.log(
-    "[ML Client] Target verified. Feature Count:",
-    Object.keys(cleanPayload).length,
-  );
+  // console.log(JSON.stringify(token));
+  // console.log("Contains newline?", token.includes("\n"));
+  // console.log("Token length:", token.length);
+  // console.log("Trimmed length:", token.trim().length);
+  // console.log("AUTH HEADER:", `Bearer ${token?.trim()}`);
+  // console.log(
+  //   "[ML Client] Cleaned payload prepared with exact 64 features.",
+  //   cleanPayload,
+  // );
+  // console.log(
+  //   "[ML Client] Target verified. Feature Count:",
+  //   Object.keys(cleanPayload).length,
+  // );
 
   // Enforce absolute fallback to 127.0.0.1 if your env variable is missing/wrong
   const targetUrl = "http://127.0.0.1:5000/predictions/predict";
@@ -449,6 +449,7 @@ export function getProgressPercentage(
 // }
 export interface ApiResponseHistoryItem {
   date: string;
+  prediction_id: string | null;
   prediction_value: {
     bdi: { confidence: number; score: number };
     cesd: { confidence: number; score: number };
@@ -470,44 +471,104 @@ const DASHBOARD_API_URL = "http://127.0.0.1:5000/dashboard";
 /**
  * Helper to map the remote backend history items into your local AssessmentResult interface
  */
+// function mapApiHistoryToAssessmentResults(
+//   apiHistory: ApiResponseHistoryItem[],
+// ): AssessmentResult[] {
+//   return apiHistory.map((item, index) => {
+//     const targetMetrics =
+//   item.prediction_value.bdi ||
+//   item.prediction_value.phq9 ||
+//   item.prediction_value.cesd;
+//   let agreementCount =0;
+//     let testType: TestType = "all59";
+//     if(item.prediction_value.phq9.score == item.prediction_value.bdi.score && item.prediction_value.phq9.score == item.prediction_value.cesd.score) agreementCount = 3;
+//     else if((item.prediction_value.phq9.score == item.prediction_value.bdi.score) || (item.prediction_value.phq9.score == item.prediction_value.cesd.score) || (item.prediction_value.bdi.score == item.prediction_value.cesd.score)) agreementCount = 2;
+//     else agreementCount = 1;
+//     if (
+//       item.prediction_value.phq9 &&
+//       !item.prediction_value.bdi &&
+//       !item.prediction_value.cesd
+//     ) {
+//       testType = "phq9";
+//     } else if (
+//       item.prediction_value.bdi &&
+//       !item.prediction_value.phq9 &&
+//       !item.prediction_value.cesd
+//     ) {
+//       testType = "bdi2";
+//     } else if (
+//       item.prediction_value.cesd &&
+//       !item.prediction_value.phq9 &&
+//       !item.prediction_value.bdi
+//     ) {
+//       testType = "cesd";
+//     }
+//     console.log("[v0] Mapped test type:", testType);
+//     return {
+//       id: item.prediction_id ?? "",
+//       testType: testType,
+//       date: item.date,
+//       answers: {}, // The dashboard endpoint payload doesn't return raw question blocks
+//       prediction: targetMetrics.score as 0 | 1 | 2 | 3,
+//       confidenceScore: targetMetrics.confidence,
+//       mentalHealthTips: [item.recommendation],
+//       agreementCount, // New field to track agreement between tests
+//     };
+//   });
+// }
 function mapApiHistoryToAssessmentResults(
   apiHistory: ApiResponseHistoryItem[],
 ): AssessmentResult[] {
-  return apiHistory.map((item, index) => {
-    const targetMetrics =
-  item.prediction_value.bdi ||
-  item.prediction_value.phq9 ||
-  item.prediction_value.cesd;
+  return apiHistory.map((item) => {
+    const { bdi, phq9, cesd } = item.prediction_value;
+
+    // Available predictions
+    const predictions = [bdi, phq9, cesd].filter(Boolean);
+
+    // Count agreement
+    const scoreCounts = new Map<number, number>();
+
+    predictions.forEach((p) => {
+      scoreCounts.set(p!.score, (scoreCounts.get(p!.score) ?? 0) + 1);
+    });
+
+    // agreementCount = largest number of models agreeing
+    const agreementCount = Math.max(...scoreCounts.values());
+
+    // Majority vote
+    let prediction: 0 | 1 | 2 | 3;
+
+    if (agreementCount === 1 && predictions.length === 3) {
+      // All three predicted different scores
+      prediction = Math.max(
+        ...predictions.map((p) => p!.score)
+      ) as 0 | 1 | 2 | 3;
+    } else {
+      // Majority vote
+      prediction = [...scoreCounts.entries()].reduce((best, curr) =>
+        curr[1] > best[1] ? curr : best
+      )[0] as 0 | 1 | 2 | 3;
+    }
+
+    // Confidence of the chosen prediction
+    const confidenceScore =
+      predictions.find((p) => p!.score === prediction)?.confidence ?? 0;
+
     let testType: TestType = "all59";
 
-    if (
-      item.prediction_value.phq9 &&
-      !item.prediction_value.bdi &&
-      !item.prediction_value.cesd
-    ) {
-      testType = "phq9";
-    } else if (
-      item.prediction_value.bdi &&
-      !item.prediction_value.phq9 &&
-      !item.prediction_value.cesd
-    ) {
-      testType = "bdi2";
-    } else if (
-      item.prediction_value.cesd &&
-      !item.prediction_value.phq9 &&
-      !item.prediction_value.bdi
-    ) {
-      testType = "cesd";
-    }
-    console.log("[v0] Mapped test type:", testType);
+    if (phq9 && !bdi && !cesd) testType = "phq9";
+    else if (bdi && !phq9 && !cesd) testType = "bdi2";
+    else if (cesd && !phq9 && !bdi) testType = "cesd";
+
     return {
-      id: `remote-${index}-${new Date(item.date).getTime()}`,
-      testType: testType,
+      id: item.prediction_id ?? "",
+      testType,
       date: item.date,
-      answers: {}, // The dashboard endpoint payload doesn't return raw question blocks
-      prediction: targetMetrics.score as 0 | 1 | 2 | 3,
-      confidenceScore: targetMetrics.confidence,
-      mentalHealthTips: [item.recommendation],
+      answers: {},
+      prediction,
+      confidenceScore,
+      mentalHealthTips: item.recommendation ? [item.recommendation] : [],
+      agreementCount,
     };
   });
 }
@@ -520,7 +581,7 @@ export async function getAssessmentHistory(
   token: string,
 ): Promise<AssessmentResult[]> {
   try {
-    console.log("[v0] Fetching assessment history from API with token:", token);
+    // console.log("[v0] Fetching assessment history from API with token:", token);
     if (!token)
       throw new Error("Authentication token is required to fetch history.");
 

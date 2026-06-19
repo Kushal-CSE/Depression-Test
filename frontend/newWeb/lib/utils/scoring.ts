@@ -22,7 +22,7 @@ export interface ScoringResult {
 export function scorePHQ9(answers: Record<string, number>): ScoringResult {
   const score = Object.values(answers).reduce((sum, val) => sum + val, 0);
   
-  let severity: 0 | 1 | 2 | 3;
+  let severity: 0 | 1 | 2 | 3 | 4;
   let label: string;
 
   if (score <= 4) {
@@ -35,10 +35,10 @@ export function scorePHQ9(answers: Record<string, number>): ScoringResult {
     severity = 2;
     label = 'Moderate';
   } else if (score <= 19) {
-    severity = 2;
+    severity = 3;
     label = 'Moderately Severe';
   } else {
-    severity = 3;
+    severity = 4;
     label = 'Severe';
   }
 

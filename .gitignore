@@ -1,5 +1,6 @@
 # Environment secrets
 .env
+logs/
 
 # Python cache
 __pycache__/

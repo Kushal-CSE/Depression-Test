@@ -25,7 +25,7 @@ export function HistoryList({ results, onDelete }: HistoryListProps) {
   };
 
   const getSeverityBadgeColor = (prediction: number) => {
-    return SEVERITY_LABELS[prediction as 0 | 1 | 2 | 3].color;
+    return SEVERITY_LABELS[prediction as 0 | 1 | 2 | 3 |4].color;
   };
 
   if (results.length === 0) {
@@ -50,12 +50,12 @@ export function HistoryList({ results, onDelete }: HistoryListProps) {
   return (
     <div className="space-y-4">
       {results.map((result,index) => {
+        console.log("Rendering:", result.id, result);
         const testConfig = getTestConfig(result.testType);
         const severity = SEVERITY_LABELS[result.prediction];
         if (!severity) {
           console.error("Invalid severity:", result.prediction, result);
         }
-
         return (
           <Card
             key={result.id}
@@ -97,13 +97,14 @@ export function HistoryList({ results, onDelete }: HistoryListProps) {
                   {/* Severity Badge and Confidence */}
                   <div className="flex items-center gap-6">
                     <div
-                      className={`px-5 py-3 rounded-lg text-center ${severity.color} min-w-[120px]`}
+                      className={`px-5 py-3 rounded-lg text-center ${severity?.color} min-w-[120px]`}
                     >
                       <div className="font-bold text-lg leading-tight">
                         {severity.label}
                       </div>
                       <div className="text-xs opacity-80 mt-1">
-                        Score: {result.prediction}/3
+                        {result?.testType === "phq9" ? `Score: ${result.prediction+1}/5`  : `Score: ${result.prediction+1}/4` }
+                        
                         {/* {result.testType === "all59"
                           ? `Prediction: ${result.prediction}/3`
                           : `Score: ${result.score}`} */}
@@ -129,7 +130,7 @@ export function HistoryList({ results, onDelete }: HistoryListProps) {
                   {/* Action Buttons */}
                   <div className="flex gap-2 w-full sm:w-auto">
                     <Link
-                      href={`/results?id=${index}`}
+                      href={`/results?id=${result.id}`}
                       className="flex-1 sm:flex-none"
                     >
                       <button className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm flex items-center justify-center gap-2 group/btn">
