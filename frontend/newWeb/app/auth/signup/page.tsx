@@ -28,9 +28,29 @@ export default function SignupPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
+    // if (password.length < 6) {
+    //   setError("Password must be at least 6 characters");
+    //   return;
+    // }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+    }
+    else if (!/[0-9]/.test(password)) {
+      setError(
+        "Password must contain at least one number",
+      );
+    }
+    else if (!/[A-Z]/.test(password)) {
+      setError(
+        "Password must contain at least one uppercase letter.",
+      );
+    }
+
+    else if (!/[!@#$%^&*(),.?\":{}|<>_\-\\[\]/+=~`]/.test(password)) {
+      setError(
+        "Password must contain at least one special character.",
+      );
     }
 
     setLoading(true);

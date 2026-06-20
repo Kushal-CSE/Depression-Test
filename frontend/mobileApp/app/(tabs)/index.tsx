@@ -105,7 +105,7 @@ export default function Page() {
       {/* <StatusBar hidden={true} /> */}
       <WebView
         // source={{ uri: "http://192.168.1.40:3000" }}
-        source={{ uri: "http://10.10.78.2:3000" }}
+        source={{ uri: "https://depressionfrontend.vercel.app" }}
         style={{ flex: 1 }}
       />
     </SafeAreaView>
