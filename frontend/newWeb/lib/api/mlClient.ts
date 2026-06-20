@@ -327,7 +327,7 @@ export async function submitToMLAPI(
       testType: "all59",
       date: new Date().toISOString(),
       answers,
-      prediction: targetMetrics.score as 0 | 1 | 2 | 3,
+      prediction: targetMetrics.score as 0 | 1 | 2 | 3 | 4,
       confidenceScore: targetMetrics.confidence,
       prediction_id: resBody.data.prediction_id,
       mentalHealthTips: [

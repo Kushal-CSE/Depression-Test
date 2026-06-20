@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 # In newbackend/app/__init__.py, add this import at the top
 from flask_cors import CORS
@@ -14,6 +16,7 @@ def create_app() -> Flask:
         resources={
             r"/*": {
                 "origins": [
+                    os.getenv("FRONTEND_URL", "http://localhost:3000"),
                     "http://localhost:3000",
                     "http://127.0.0.1:3000",
                     "http://localhost:3001"

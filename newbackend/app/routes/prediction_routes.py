@@ -1,4 +1,5 @@
 from flask import Blueprint
+import os
 from flask_cors import cross_origin
 
 from app.controllers.prediction_controller import (
@@ -25,7 +26,7 @@ prediction_blueprint = Blueprint(
     methods=["POST", "OPTIONS"] 
 )
 @cross_origin(
-    origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"],
+    origins=[os.getenv("FRONTEND_URL", "http://localhost:3000"),"http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"],
     methods=["POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
     supports_credentials=True

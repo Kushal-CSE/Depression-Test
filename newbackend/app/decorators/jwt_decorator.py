@@ -1,4 +1,5 @@
 from functools import wraps
+import os
 from typing import Callable
 
 from flask import Flask, request, jsonify, g
@@ -18,6 +19,7 @@ CORS(
     resources={
         r"/*": {
             "origins": [
+                os.getenv("FRONTEND_URL", "http://localhost:3000"),
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
                 "http://localhost:3001"
