@@ -18,7 +18,8 @@ def connect_smtp_server() -> smtplib.SMTP:
 
     server = smtplib.SMTP(
         SMTP_HOST,
-        SMTP_PORT
+        SMTP_PORT,
+        timeout=10
     )
 
     server.starttls()

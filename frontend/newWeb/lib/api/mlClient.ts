@@ -8,7 +8,7 @@ import { getTestConfig } from "../data/testConfigs";
 import { es } from "date-fns/locale/es";
 
 // const FLASK_API_URL = 'http://127.0.0.1:5000';
-const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
+const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || "http://127.0.0.1:5000";
 
 /**
  * Maps answers from our UI format to the ML model's expected feature format
@@ -260,6 +260,34 @@ interface PostmanPredictionResponse {
     prediction_id: string;
   };
 }
+function getFinalScore(data: {
+  bdi: { score: number };
+  cesd: { score: number };
+  phq9: { score: number };
+}): number {
+  const scores = [
+    data.bdi.score,
+    data.cesd.score,
+    data.phq9.score === 4 ? 3 : data.phq9.score, // Normalize PHQ-9
+  ];
+
+  const frequency = new Map<number, number>();
+
+  for (const score of scores) {
+    frequency.set(score, (frequency.get(score) ?? 0) + 1);
+  }
+
+  // Majority vote
+  for (const [score, count] of frequency.entries()) {
+    if (count >= 2) {
+      return score;
+    }
+  }
+
+  // No majority -> highest score
+  return Math.max(...scores);
+}
+
 
 export async function submitToMLAPI(
   answers: Record<string, number>,
@@ -278,21 +306,6 @@ export async function submitToMLAPI(
     const val = rawMappedFeatures[key];
     cleanPayload[key] = val !== undefined && val !== null ? val : 0;
   });
-  // console.log(JSON.stringify(token));
-  // console.log("Contains newline?", token.includes("\n"));
-  // console.log("Token length:", token.length);
-  // console.log("Trimmed length:", token.trim().length);
-  // console.log("AUTH HEADER:", `Bearer ${token?.trim()}`);
-  // console.log(
-  //   "[ML Client] Cleaned payload prepared with exact 64 features.",
-  //   cleanPayload,
-  // );
-  // console.log(
-  //   "[ML Client] Target verified. Feature Count:",
-  //   Object.keys(cleanPayload).length,
-  // );
-
-  // Enforce absolute fallback to 127.0.0.1 if your env variable is missing/wrong
   const targetUrl = `${FLASK_API_URL}/predictions/predict`;
   try {
     const response = await fetch(targetUrl, {
@@ -319,6 +332,7 @@ export async function submitToMLAPI(
     console.log("Prediction ID from backend:", resBody.data.prediction_id);
     // Using BDI metrics as your default screen values for UI compatibility
     const targetMetrics = resBody.data.bdi || resBody.data.phq9;
+    const finalScore = getFinalScore(resBody.data);
     const id =
       resBody.data.prediction_id ||
       `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -327,7 +341,7 @@ export async function submitToMLAPI(
       testType: "all59",
       date: new Date().toISOString(),
       answers,
-      prediction: targetMetrics.score as 0 | 1 | 2 | 3,
+      prediction: finalScore as 0 | 1 | 2 | 3,
       confidenceScore: targetMetrics.confidence,
       prediction_id: resBody.data.prediction_id,
       mentalHealthTips: [

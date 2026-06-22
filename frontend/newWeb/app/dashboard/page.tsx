@@ -688,7 +688,7 @@ const handleClearAll = async () => {
             <HistoryList results={sortedHistory} onDelete={handleDelete} />
 
             {/* Empty State */}
-            {history.length === 0 && (
+            {/* {history.length === 0 && (
               <Card className="border-0 shadow-lg bg-white overflow-hidden">
                 <div className="p-12 text-center">
                   <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-100 mb-6">
@@ -708,7 +708,7 @@ const handleClearAll = async () => {
                   </Link>
                 </div>
               </Card>
-            )}
+            )} */}
           </>
         )}
       </div>

@@ -2,16 +2,17 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { AssessmentCarousel } from '@/components/AssessmentCarousel';
 import { UserMenu } from '@/components/UserMenu';
-import { Lightbulb } from 'lucide-react';
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Navigation Bar */}
+      {/* Navigation Bar
+      <Navbar />
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-7xl flex items-center justify-between h-16">
-            {/* Logo */}
+            
             <Link href="/" className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
                 <Lightbulb className="w-5 h-5 text-white" />
@@ -19,7 +20,7 @@ export default function Home() {
               <span className="font-bold text-gray-900 text-lg">MindCare</span>
             </Link>
 
-            {/* Right Navigation */}
+            
             <div className="flex items-center gap-4">
               <a href="#assessments" className="text-gray-700 hover:text-blue-600 font-medium text-sm">
                 Assessments
@@ -28,7 +29,8 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </nav>
+      </nav> */}
+       <Navbar />
 
       {/* Hero Section */}
       <div className="px-4 sm:px-6 lg:px-8 py-20">

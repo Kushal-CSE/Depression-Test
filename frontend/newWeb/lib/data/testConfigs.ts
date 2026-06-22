@@ -774,11 +774,11 @@ export const CESD_CONFIG: TestConfig = {
 
 export const ALL_QUESTIONS_CONFIG: TestConfig = {
   testType: "all59",
-  name: "Complete Assessment (All 59 Questions)",
+  name: "Complete Assessment (All 56 Questions)",
   description:
     "This comprehensive assessment combines all questionnaires for a thorough evaluation.",
   icon: "🔬",
-  totalQuestions: 59,
+  totalQuestions: 56,
   questions: [
     // ==========================================
     // 1. DEMOGRAPHICS & PROFILE CHARACTERISTICS
