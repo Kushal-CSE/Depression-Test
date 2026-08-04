@@ -1,435 +1,209 @@
+# Depression Severity Screening System
 
+A full-stack web application that combines validated psychological assessment questionnaires with machine learning models to screen depression severity and generate AI-assisted mental health recommendations.
 
+> Final Year B.Tech Project — Computer Science & Engineering, MAKAUT
 
-
-
-
-
-
-# API Testing Documentation
-
-## 1. User Registration
-
-### Endpoint
-
-```
-POST http://127.0.0.1:5000/auth/signup
-```
-
-### Request Body
-
-```json
-{
-    "name": "Kusha1",
-    "email": "kushal1@test.com",
-    "password": "Password@1123"
-}
-```
-
-### Response
-
-```json
-{
-    "success": true,
-    "message": "Signup successful",
-    "data": {
-        "token": "<JWT_TOKEN>",
-        "user": {
-            "id": "6a2133ec47e00909cc1b45ec",
-            "name": "Kusha1",
-            "email": "kushal1@test.com",
-            "role": "user",
-            "is_verified": true,
-            "created_at": "2026-06-04T08:14:36.115316+00:00",
-            "updated_at": "2026-06-04T08:14:36.115316+00:00"
-        }
-    }
-}
-```
+> This project is intended for educational and research purposes only. It is not a substitute for professional medical diagnosis.
 
 ---
 
-## 2. User Login
+## Live Demo
 
-### Endpoint
+Frontend:
+https://depressionfrontend.vercel.app/
 
-```
-POST http://127.0.0.1:5000/auth/login
-```
-
-### Request Body
-
-```json
-{
-    "email": "kushal@test.com",
-    "password": "Password@123"
-}
-```
-
-### Response
-
-```json
-{
-    "success": true,
-    "message": "Login successful",
-    "data": {
-        "token": "<JWT_TOKEN>",
-        "user": {
-            "id": "6a0fbdd3f44271e38acb2903",
-            "name": "Kushal",
-            "email": "kushal@test.com",
-            "role": "user",
-            "is_verified": true,
-            "created_at": "2026-05-22T02:22:11.363239+00:00",
-            "updated_at": "2026-05-22T02:22:11.363239+00:00"
-        }
-    }
-}
-```
+> **Note**
+>
+> The frontend is hosted on Vercel and the backend on Render's free tier.
+> If the backend has been inactive, the first request may take approximately 1–2 minutes while the server starts. Subsequent requests are significantly faster.
 
 ---
 
-## 3. Depression Prediction
+## Demonstration
 
-### Endpoint
+![Application Demo](docs/demo.gif)
 
-```
-POST http://127.0.0.1:5000/predictions/predict
-```
+---
+
+## Screenshots
+
+### Landing Page
+
+![Landing Page](docs/screenshots/home.jpeg)
+
+Users can choose between multiple validated depression assessment questionnaires.
 
 ### Authentication
 
-```
-Authorization: Bearer <JWT_TOKEN>
-```
+| Login | Registration |
+|--------|--------------|
+| ![](docs/screenshots/login.jpeg) | ![](docs/screenshots/signup.jpeg) |
 
-### Request Body
+JWT-based authentication allows users to securely save and access their assessment history.
 
-```json
-{
-    "Gender": 0,
-    "Relationship_Status_Single": 1,
-    "Relationship_Status_In a Relationship": 0,
-    "Relationship_Status_Married": 0,
-    "Relationship_Status_Divorced": 0,
-    "Age": 21,
-    "Academic Status": 4,
-    "Work_While_Study": 1,
-    "Residential_Area_Hall": 1,
-    "Residential_Area_Outside Hall": 0,
-    "Residential_Area_With family": 0,
-    "Social Economic Status": 4,
-    "Financial_Pressure": 1,
-    "Has_Debts": 1,
-    "Satisfied_Living_Environment": 0,
-    "Lost_Someone_Recently": 1,
-    "Physical_Activity": 1,
-    "Significant_Ailments": 1,
-    "On_Medication": 0,
-    "Smoking": 0,
-    "Alcohol_Consumption": 1,
-    "Sleep_Duration": 4,
-    "Social_Media_Hours": 3,
-    "Workload_Academic_Demand": 1,
-    "Melancholic": 2,
-    "Future_Hopelessness": 1,
-    "Self_Perceived_Failure": 1,
-    "Interest_Loss": 2,
-    "Meaninglessness": 2,
-    "Hopelessness_EndFeeling": 1,
-    "Feeling_Insignificant": 1,
-    "Self_Confidence_Erosion": 3,
-    "Crying_Frequency": 3,
-    "Agitation_Level": 3,
-    "Social_Withdrawal": 1,
-    "Indecisiveness": 1,
-    "Anhedonia_No_Joy": 0,
-    "Fatigue_Frequency": 0,
-    "Insomnia": 2,
-    "Irritability": 2,
-    "Low_Appetite": 0,
-    "Difficulty_Focusing": 0,
-    "Easy_Fatigue": 1,
-    "Low_Concentration": 1,
-    "Difficulty_Speaking_Socially": 1,
-    "High_Appetite": 2,
-    "Restlessness": 1,
-    "Life_Feels_Hard": 1,
-    "Fear_Something_Bad": 1,
-    "Recent_Abuse_Experience": 1,
-    "Feels_Pitied": 1,
-    "Lack_of_Pleasure": 1,
-    "Feeling_Down": 1,
-    "Feels_Others_Are_Kind": 1,
-    "Performance_Decline": 1,
-    "Share_Feelings_Lack": 1,
-    "Social_LeftOut_Level": 2,
-    "Isolation_Frequency": 2,
-    "No_Support_Frequency": 2,
-    "Loneliness_Frequency": 2,
-    "Emotional_Alignment_Frequency": 2,
-    "Presence_Not_Genuine_Frequency": 2,
-    "Relationships_Unimportant_Level": 2,
-    "Suicidal_Thoughts": 1
-}
-```
+### Assessment Interface
 
-### Response
+![PHQ-9 Assessment](docs/screenshots/phq9.jpeg)
 
-```json
-{
-    "success": true,
-    "message": "Prediction generated successfully",
-    "data": {
-        "phq9": {
-            "score": 2,
-            "confidence": 51.5
-        },
-        "bdi": {
-            "score": 2,
-            "confidence": 97.0
-        },
-        "cesd": {
-            "score": 2,
-            "confidence": 76.51
-        }
-    }
-}
+Interactive questionnaire interface with progress tracking and one-question-at-a-time navigation.
+
+### Dashboard
+
+![Dashboard](docs/screenshots/dashboard.jpeg)
+
+Review previous assessments, confidence scores, AI recommendations, and assessment history.
+
+---
+
+## Features
+
+- User registration and authentication using JWT
+- PHQ-9 assessment
+- BDI-II assessment
+- CES-D assessment
+- Complete combined assessment
+- Machine learning-based depression severity prediction
+- AI-generated mental health recommendations
+- Assessment history
+- Dashboard with historical results
+- Responsive user interface
+- RESTful backend API
+
+---
+
+## Machine Learning
+
+The application predicts depression severity using supervised machine learning models trained on a student mental health dataset.
+
+Supported assessment scales:
+
+- PHQ-9
+- BDI-II
+- CES-D
+
+Models evaluated:
+
+- Logistic Regression
+- Random Forest
+- Support Vector Machine (SVM)
+
+Predictions include severity levels and confidence scores, followed by personalized recommendations generated by a language model.
+
+---
+
+## System Architecture
+
+```text
+                Next.js Frontend
+                       │
+                       ▼
+               Flask REST API
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+ Authentication   ML Prediction   Recommendation
+        │
+        ▼
+     MongoDB
 ```
 
 ---
 
-## 4. Save Manual Assessment
+## Technology Stack
 
+| Layer | Technologies |
+|--------|--------------|
+| Frontend | Next.js, React, TypeScript, Tailwind CSS |
+| Backend | Flask, Python |
+| Database | MongoDB |
+| Machine Learning | Scikit-learn |
+| Authentication | JWT |
+| Deployment | Vercel, Render |
 
-### Endpoint
+---
 
-```
-POST http://127.0.0.1:5000/predictions/save
-```
+## Local Installation
 
-### Authentication
+### Backend
 
-```
-Authorization: Bearer <JWT_TOKEN>
-```
+```bash
+cd backend
 
-### Request Body
-```
-{
-    "input_data": {
-        "Agitation_Level": 3,
-        "Difficulty_Focusing": 0,
-        "Feeling_Down": 1,
-        "Fatigue_Frequency": 0,
-        "Insomnia": 2,
-        "Interest_Loss": 2,
-        "Low_Appetite": 0,
-        "Self_Perceived_Failure": 1,
-        "Suicidal_Thoughts": 1
-    },
-    "phq9": {
-        "score": 14,
-        "confidence": 100
-    }
-}
-```
-------------------------------------------------------------------
-```
-{
-    "input_data": {
-        "Agitation_Level": 3,
-        "Anhedonia_No_Joy": 2,
-        "Crying_Frequency": 1,
-        "Difficulty_Focusing": 0,
-        "Easy_Fatigue": 2,
-        "Fatigue_Frequency": 1,
-        "Feeling_Insignificant": 2,
-        "Future_Hopelessness": 3,
-        "Hopelessness_EndFeeling": 1,
-        "Indecisiveness": 0,
-        "Insomnia": 2,
-        "Interest_Loss": 3,
-        "Irritability": 1,
-        "Low_Appetite": 0,
-        "Meaninglessness": 2,
-        "Melancholic": 1,
-        "Self_Confidence_Erosion": 3,
-        "Self_Perceived_Failure": 2,
-        "Social_Withdrawal": 1,
-        "Suicidal_Thoughts": 2
-    },
-    "bdi": {
-        "score": 32,
-        "confidence": 100
-    }
-}
-```
---------------------------------------------------------------
-```
-{
-    "input_data": {
-        "Agitation_Level": 2,
-        "Anhedonia_No_Joy": 1,
-        "Crying_Frequency": 0,
-        "Difficulty_Focusing": 3,
-        "Fatigue_Frequency": 1,
-        "Feeling_Down": 2,
-        "Future_Hopelessness": 3,
-        "Hopelessness_EndFeeling": 2,
-        "Indecisiveness": 1,
-        "Insomnia": 0,
-        "Interest_Loss": 2,
-        "Irritability": 1,
-        "Isolation_Frequency": 3,
-        "Loneliness_Frequency": 2,
-        "Low_Appetite": 0,
-        "Meaninglessness": 2,
-        "Melancholic": 1,
-        "Performance_Decline": 3,
-        "Self_Confidence_Erosion": 2,
-        "Social_Withdrawal": 1
-    },
-    "cesd": {
-        "score": 32,
-        "confidence": 100
-    }
-}
+python -m venv venv
+
+pip install -r requirements.txt
+
+python run.py
 ```
 
-### Response
+### Frontend
 
-{
-    "success": true,
-    "message": "Manual test saved successfully",
-    "data": {
-        "success": true,
-        "prediction_id": "6a2f3e9b4f44271e38acb999"
-    }
-}
+```bash
+cd frontend
 
+npm install
 
-### Description
-
-Save a manually completed depression assessment result.
-
-Exactly one of the following assessment types must be provided:
-
-phq9
-bdi
-cesd
-
-Any assessment type not provided will be stored as null.
-
-
-## 5. Dashboard
-
-### Endpoint
-
-```
-GET http://127.0.0.1:5000/dashboard
-```
-
-### Authentication
-
-```
-Authorization: Bearer <JWT_TOKEN>
-```
-
-### Response
-
-```json
-{
-    "success": true,
-    "data": {
-        "user": {
-            "id": "6a0fbdd3f44271e38acb2903",
-            "name": "Kushal",
-            "email": "kushal@test.com"
-        },
-        "history": [
-            {
-                "date": "2026-06-04T08:05:03.766761+00:00",
-                "prediction_value": {
-                    "phq9": {
-                        "score": 2,
-                        "confidence": 51.5
-                    },
-                    "bdi": {
-                        "score": 2,
-                        "confidence": 97.0
-                    },
-                    "cesd": {
-                        "score": 2,
-                        "confidence": 76.51
-                    }
-                },
-                "recommendation": "Based on the predictions, we recommend consulting a mental health professional for a comprehensive evaluation and personalized treatment plan."
-            }
-        ]
-    }
-}
-```
-
-```
-{
-    "data": {
-        "history": [
-            {
-                "date": "2026-06-15T07:12:11.358069+00:00",
-                "prediction_value": {
-                    "bdi": null,
-                    "cesd": null,
-                    "phq9": {
-                        "confidence": 100,
-                        "score": 14
-                    }
-                },
-                "recommendation": null
-            },
-            {
-                "date": "2026-06-15T07:11:32.930765+00:00",
-                "prediction_value": {
-                    "bdi": {
-                        "confidence": 97.0,
-                        "score": 2
-                    },
-                    "cesd": {
-                        "confidence": 76.51,
-                        "score": 2
-                    },
-                    "phq9": {
-                        "confidence": 51.5,
-                        "score": 2
-                    }
-                },
-                "recommendation": "⚠️ Ollama service not running. Please start Ollama first (ollama serve)"
-            }
-        ],
-        "user": {
-            "email": "kushal1@test.com",
-            "id": "6a2133ec47e00909cc1b45ec",
-            "name": "Kusha1"
-        }
-    },
-    "success": true
-}
+npm run dev
 ```
 
 ---
 
-## API Workflow
+## Environment Variables
 
+Backend
+
+```env
+MONGO_URI=
+
+JWT_SECRET=
+
+RECOMMENDATION_PROVIDER=
+
+OLLAMA_URL=
 ```
-1. User Signup/Login
-          ↓
-2. Receive JWT Token
-          ↓
-3. Submit Prediction Request
-          ↓
-4. Prediction Saved to History
-          ↓
-5. Retrieve Dashboard Data
-          ↓
-6. View User Profile + Prediction History
+
+Frontend
+
+```env
+NEXT_PUBLIC_API_URL=
 ```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/auth/signup` | Register a new user |
+| POST | `/auth/login` | Authenticate a user |
+| POST | `/predictions/predict` | Generate a prediction |
+| POST | `/predictions/save` | Save an assessment |
+| GET | `/dashboard` | Retrieve assessment history |
+
+Detailed request and response examples are available in `API.md`.
+
+---
+
+## Future Work
+
+- Email verification
+- Password reset
+- Explainable AI
+- Mobile application
+- Administrative dashboard
+
+---
+
+## Authors
+
+**Kushal Karmakar**
+**Rishi Saha**
+**MD Mehar Belal**
+**Priartha Sarkar**
+
+Bachelor of Technology in Computer Science and Engineering
+
+Maulana Abul Kalam Azad University of Technology (MAKAUT)
+
+
