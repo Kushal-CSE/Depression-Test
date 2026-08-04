@@ -194,16 +194,15 @@ Detailed request and response examples are available in `API.md`.
 - Administrative dashboard
 
 ---
-
 ## Authors
 
-**Kushal Karmakar**
-**Rishi Saha**
-**MD Mehar Belal**
-**Priartha Sarkar**
+This project was developed as a Final Year B.Tech Project by:
 
-Bachelor of Technology in Computer Science and Engineering
+- **Kushal Karmakar** – [GitHub](https://github.com/Kushal-CSE)
+- **Rishi Saha** – [GitHub](https://github.com/myself-Rishi-saha)
+- **MD Mehar Belal** – [GitHub](https://github.com/md-mehar-belal)
+- **Priartha Sarkar** – [GitHub](https://github.com/Priartha)
 
-Maulana Abul Kalam Azad University of Technology (MAKAUT)
+**Bachelor of Technology in Computer Science and Engineering**
 
-
+**Maulana Abul Kalam Azad University of Technology (MAKAUT)**
